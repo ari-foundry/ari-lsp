@@ -69,5 +69,7 @@ download or build the Ari compiler.
 
 `scripts/smoke.sh` delegates to `scripts/build.sh`, then runs the resulting
 `build/ari-lsp` executable with stdin from `/dev/null` and expects exit status
-0 with no stdout or stderr. This checks only the current placeholder entrypoint
-and JSON-RPC stdio loop scaffold.
+0 with no stdout or stderr. It also sends a minimal initialize/shutdown/exit
+JSON-RPC stream and checks the current fixed initialize and shutdown responses.
+This checks only the current placeholder entrypoint and JSON-RPC stdio smoke
+scaffold.

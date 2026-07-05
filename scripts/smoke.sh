@@ -41,4 +41,35 @@ set -e
 [ ! -s "$stdout_file" ] || fail "expected no stdout from minimal entrypoint"
 [ ! -s "$stderr_file" ] || fail "expected no stderr from minimal entrypoint"
 
+protocol_input="$tmp_dir/protocol-input"
+protocol_stdout="$tmp_dir/protocol-stdout"
+protocol_stderr="$tmp_dir/protocol-stderr"
+protocol_expected="$tmp_dir/protocol-expected"
+
+{
+  printf 'Content-Length: 58\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'
+  printf 'Content-Length: 44\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id":2,"method":"shutdown"}'
+  printf 'Content-Length: 33\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","method":"exit"}'
+} > "$protocol_input"
+
+{
+  printf 'Content-Length: 53\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id":1,"result":{"capabilities":{}}}'
+  printf 'Content-Length: 38\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id":2,"result":null}'
+} > "$protocol_expected"
+
+printf '%s\n' "smoke.sh: running protocol smoke"
+set +e
+"$binary" < "$protocol_input" > "$protocol_stdout" 2> "$protocol_stderr"
+protocol_status=$?
+set -e
+
+[ "$protocol_status" -eq 0 ] || fail "expected protocol smoke exit status 0, got $protocol_status"
+[ ! -s "$protocol_stderr" ] || fail "expected no stderr from protocol smoke"
+cmp -s "$protocol_expected" "$protocol_stdout" || fail "unexpected protocol smoke stdout"
+
 printf '%s\n' "smoke.sh: smoke checks passed"

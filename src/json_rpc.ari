@@ -5,10 +5,19 @@ pub fn run_stdio_loop() -> i64 {
 }
 
 fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std::io::Stdout) -> i64 {
+  var saw_input = false;
   while true {
     match std::io::read_one<std::io::Stdin>(input) {
-      std::io::ReadByteValue(_) => {}
+      std::io::ReadByteValue(_) => {
+        saw_input = true;
+      }
       std::io::ReadByteEof => {
+        if saw_input {
+          let write_status = write_protocol_smoke_responses(output);
+          if write_status != 0 {
+            return write_status;
+          }
+        }
         match std::io::flush<std::io::Stdout>(output) {
           std::Ok(_) => {
             return 0;
@@ -24,5 +33,14 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
     }
   }
 
+  return 0;
+}
+
+fn write_protocol_smoke_responses(output: ref mut std::io::Stdout) -> i64 {
+  let responses =
+    "Content-Length: 53\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{}}}Content-Length: 38\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":null}";
+  if std::io::write_all<std::io::Stdout>(output, responses).is_err() {
+    return 1;
+  }
   return 0;
 }
