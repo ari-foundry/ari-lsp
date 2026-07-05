@@ -111,8 +111,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
 
           if reading_id_value {
             if is_ascii_digit(value) {
-              id_value = id_value * 10 + ascii_digit_value(value);
-              saw_id_digit = true;
+              let request_id_value_scan_update = scan_smoke_request_id_value_digit(value, id_value);
+              id_value = request_id_value_scan_update.id_value;
+              saw_id_digit = request_id_value_scan_update.saw_id_digit;
             } else {
               let request_id_value_scan_finish = finish_smoke_request_id_value_scan(
                 value,
@@ -414,6 +415,11 @@ struct SmokeRequestIdValueScanFinish {
 struct SmokeRequestIdValueScanStart {
   waiting_id_value: bool,
   reading_id_value: bool,
+  id_value: i64,
+  saw_id_digit: bool,
+}
+
+struct SmokeRequestIdValueScanUpdate {
   id_value: i64,
   saw_id_digit: bool,
 }
@@ -894,6 +900,13 @@ fn start_smoke_request_id_value_scan(value: u8) -> SmokeRequestIdValueScanStart 
     waiting_id_value: false,
     reading_id_value: true,
     id_value: ascii_digit_value(value),
+    saw_id_digit: true,
+  };
+}
+
+fn scan_smoke_request_id_value_digit(value: u8, id_value: i64) -> SmokeRequestIdValueScanUpdate {
+  return SmokeRequestIdValueScanUpdate {
+    id_value: id_value * 10 + ascii_digit_value(value),
     saw_id_digit: true,
   };
 }
