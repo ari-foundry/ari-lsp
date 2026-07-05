@@ -123,6 +123,7 @@ require_grep "fallback_smoke_request_id_value_wait" src/json_rpc.ari
 require_grep "SmokeRequestIdColonWaitStart" src/json_rpc.ari
 require_grep "start_smoke_request_id_colon_wait" src/json_rpc.ari
 require_grep "finalize_body_end_smoke_request_id" src/json_rpc.ari
+require_grep "complete_body_end_smoke_frame" src/json_rpc.ari
 require_grep "JsonRpcFrameProgress" src/json_rpc.ari
 require_grep "complete_json_rpc_frame" src/json_rpc.ari
 require_grep "consume_json_rpc_body_byte" src/json_rpc.ari
@@ -148,6 +149,7 @@ require_grep "frame_has_supported_smoke_request_id" src/json_rpc.ari
 require_grep "is_supported_smoke_request_id" src/json_rpc.ari
 require_grep "write_supported_smoke_request_id" src/json_rpc.ari
 require_grep "body_end_request_id.present" src/json_rpc.ari
+require_grep "let completed_frame = complete_body_end_smoke_frame" src/json_rpc.ari
 require_grep "body_end_frame_state.frame_progress" src/json_rpc.ari
 require_grep "body_end_scan_reset.header_scan" src/json_rpc.ari
 require_grep "scanned_header_start.content_length_match" src/json_rpc.ari
