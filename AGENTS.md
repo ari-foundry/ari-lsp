@@ -28,8 +28,9 @@ implementation work.
 - Ari-language implementation source is limited to a minimal `src/main.ari`
   entrypoint plus placeholder server, config, JSON-RPC, protocol, and transport
   modules that return 0.
-- JSON-RPC request parsing and Language Server Protocol handling are not
-  implemented here yet. A minimal stdin EOF loop scaffold exists.
+- JSON-RPC request parsing and general Language Server Protocol handling are
+  not implemented here yet. A minimal stdin EOF loop and fixed protocol smoke
+  response scaffold exist.
 - Local build and smoke scripts require an explicit Ari compiler path.
 - Compiler-free repository-shape validation is available through
   `scripts/check.sh`.

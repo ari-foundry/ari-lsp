@@ -70,6 +70,9 @@ require_grep "pub fn run_stdio_loop() -> i64" src/json_rpc.ari
 require_grep "std::io::stdin()" src/json_rpc.ari
 require_grep "std::io::read_one<std::io::Stdin>" src/json_rpc.ari
 require_grep "std::io::flush<std::io::Stdout>" src/json_rpc.ari
+require_grep "write_protocol_smoke_responses" src/json_rpc.ari
+require_grep "Content-Length: 53" src/json_rpc.ari
+require_grep "Content-Length: 38" src/json_rpc.ari
 require_grep "pub fn initial_protocol_status() -> i64" src/protocol.ari
 require_grep "pub fn initial_transport_status() -> i64" src/transport.ari
 require_no_grep "JSON-RPC" src/main.ari
@@ -86,5 +89,10 @@ require_no_grep "cargo " .github/workflows/check.yml
 require_no_grep "tools/lsp" scripts/build.sh
 require_no_grep "tools/lsp" scripts/smoke.sh
 require_grep "< /dev/null" scripts/smoke.sh
+require_grep "protocol smoke" scripts/smoke.sh
+require_grep "Content-Length: 58" scripts/smoke.sh
+require_grep '"method":"initialize"' scripts/smoke.sh
+require_grep '"method":"shutdown"' scripts/smoke.sh
+require_grep '"method":"exit"' scripts/smoke.sh
 
 printf '%s\n' "check.sh: repository checks passed"
