@@ -4,13 +4,16 @@
 
 This document records the protocol boundary for the initial split workspace.
 
-No JSON-RPC implementation exists in this repository yet.
+A minimal JSON-RPC stdio loop scaffold exists in this repository. It reads
+stdin until EOF, flushes stdout at EOF, emits no protocol messages, and returns
+0 for clean EOF.
 
 ## Current Status
 
 - `src/main.ari` routes through placeholder server, config, JSON-RPC,
-  protocol, and transport modules that return 0 and do not read stdin or write
-  stdout/stderr.
+  protocol, and transport modules.
+- The JSON-RPC loop currently reads stdin byte-by-byte until EOF and flushes
+  stdout without writing messages.
 - No JSON-RPC framing is implemented.
 - No Language Server Protocol methods are implemented.
 - Protocol compatibility is not claimed by this scaffold.
@@ -59,8 +62,8 @@ When protocol behavior moves here, it should be added in small, testable steps:
 
 ## Non-Goals
 
-- Do not implement JSON-RPC in this scaffold step.
-- Do not read stdin or write protocol messages in this scaffold step.
+- Do not implement JSON-RPC framing or request parsing in this scaffold step.
+- Do not write protocol messages in this scaffold step.
 - Do not claim parity with bundled `tools/lsp`.
 - Do not claim replacement status for `ari-foundry/ari/tools/lsp`.
 - Do not invent new Ari LSP methods or protocol extensions.

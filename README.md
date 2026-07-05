@@ -51,7 +51,7 @@ You may also set `ARI_COMPILER`; a positional compiler path takes precedence.
 
 ## Current Non-Goals
 
-- No JSON-RPC server is implemented here yet.
+- No JSON-RPC request parsing or LSP method dispatch is implemented here yet.
 - No Language Server Protocol request handling is implemented here yet.
 - No diagnostics, document tracking, code actions, symbols, completion, hover,
   or editor integration are implemented here yet.
@@ -68,5 +68,6 @@ the compiler path exists and is executable, creates `build/`, and does not
 download or build the Ari compiler.
 
 `scripts/smoke.sh` delegates to `scripts/build.sh`, then runs the resulting
-`build/ari-lsp` executable and expects exit status 0 with no stdout or stderr.
-This checks only the current placeholder entrypoint and source module scaffold.
+`build/ari-lsp` executable with stdin from `/dev/null` and expects exit status
+0 with no stdout or stderr. This checks only the current placeholder entrypoint
+and JSON-RPC stdio loop scaffold.
