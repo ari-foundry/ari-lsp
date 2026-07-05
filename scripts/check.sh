@@ -87,6 +87,8 @@ require_grep "ScannedSmokeRequestId" src/json_rpc.ari
 require_grep "finalize_scanned_smoke_request_id" src/json_rpc.ari
 require_grep "JsonRpcFrameProgress" src/json_rpc.ari
 require_grep "complete_json_rpc_frame" src/json_rpc.ari
+require_grep "ContentLengthParseResult" src/json_rpc.ari
+require_grep "finalize_content_length_parse" src/json_rpc.ari
 require_grep "CompletedSmokeFrame" src/json_rpc.ari
 require_grep "complete_smoke_frame" src/json_rpc.ari
 require_grep "SmokeFrameScanState" src/json_rpc.ari
@@ -99,7 +101,7 @@ require_grep "apply_completed_smoke_frame_to_protocol_state" src/json_rpc.ari
 require_grep "frame_has_supported_smoke_request_id" src/json_rpc.ari
 require_grep "is_supported_smoke_request_id" src/json_rpc.ari
 require_grep "write_supported_smoke_request_id" src/json_rpc.ari
-require_grep "body_remaining = pending_content_length" src/json_rpc.ari
+require_grep "body_remaining = parsed_content_length.length" src/json_rpc.ari
 require_grep "Content-Length: 53" src/json_rpc.ari
 require_grep "Content-Length: 38" src/json_rpc.ari
 require_grep "pub fn initial_protocol_status() -> i64" src/protocol.ari

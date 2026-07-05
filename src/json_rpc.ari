@@ -206,8 +206,12 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             header_end_match = 0;
           } else {
             header_end_match = next_header_end_match_index(value, header_end_match);
-            if header_end_match == 4 && saw_content_length_digit {
-              body_remaining = pending_content_length;
+            let parsed_content_length = finalize_content_length_parse(
+              saw_content_length_digit,
+              pending_content_length,
+              header_end_match);
+            if parsed_content_length.present {
+              body_remaining = parsed_content_length.length;
               if body_remaining == 0 {
                 let zero_length_frame_progress = JsonRpcFrameProgress {
                   body_remaining: body_remaining,
@@ -306,6 +310,11 @@ struct ContentLengthHeaderScanState {
   saw_content_length_digit: bool,
   pending_content_length: i64,
   header_end_match: i64,
+}
+
+struct ContentLengthParseResult {
+  present: bool,
+  length: i64,
 }
 
 struct SmokeProtocolState {
@@ -551,6 +560,13 @@ fn complete_json_rpc_frame(progress: JsonRpcFrameProgress) -> JsonRpcFrameProgre
   return JsonRpcFrameProgress {
     body_remaining: 0,
     complete_frame_count: progress.complete_frame_count + 1,
+  };
+}
+
+fn finalize_content_length_parse(saw_digit: bool, length: i64, header_end_match: i64) -> ContentLengthParseResult {
+  return ContentLengthParseResult {
+    present: saw_digit && header_end_match == 4,
+    length: length,
   };
 }
 
