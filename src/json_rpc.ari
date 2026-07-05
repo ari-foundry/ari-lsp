@@ -119,10 +119,11 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
           } else if waiting_id_value {
             if !is_json_whitespace(value) {
               if is_ascii_digit(value) {
-                waiting_id_value = false;
-                reading_id_value = true;
-                id_value = ascii_digit_value(value);
-                saw_id_digit = true;
+                let request_id_value_scan_start = start_smoke_request_id_value_scan(value);
+                waiting_id_value = request_id_value_scan_start.waiting_id_value;
+                reading_id_value = request_id_value_scan_start.reading_id_value;
+                id_value = request_id_value_scan_start.id_value;
+                saw_id_digit = request_id_value_scan_start.saw_id_digit;
               } else {
                 waiting_id_value = false;
                 id_key_match = next_id_key_match_index(value, 0);
@@ -339,6 +340,13 @@ struct SmokeRequestIdValueScanReset {
   id_value: i64,
   saw_id_digit: bool,
   id_key_match: i64,
+}
+
+struct SmokeRequestIdValueScanStart {
+  waiting_id_value: bool,
+  reading_id_value: bool,
+  id_value: i64,
+  saw_id_digit: bool,
 }
 
 struct JsonRpcFrameProgress {
@@ -702,6 +710,15 @@ fn reset_smoke_request_id_value_scan(value: u8) -> SmokeRequestIdValueScanReset 
     id_value: 0,
     saw_id_digit: false,
     id_key_match: next_id_key_match_index(value, 0),
+  };
+}
+
+fn start_smoke_request_id_value_scan(value: u8) -> SmokeRequestIdValueScanStart {
+  return SmokeRequestIdValueScanStart {
+    waiting_id_value: false,
+    reading_id_value: true,
+    id_value: ascii_digit_value(value),
+    saw_id_digit: true,
   };
 }
 
