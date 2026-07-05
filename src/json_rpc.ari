@@ -72,11 +72,12 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
           } else if waiting_method_value {
             if !is_json_whitespace(value) {
               if value == 34u8 {
-                waiting_method_value = false;
-                reading_method_value = true;
-                initialize_value_match = 0;
-                shutdown_value_match = 0;
-                exit_value_match = 0;
+                let method_value_scan_start = start_smoke_method_value_scan();
+                waiting_method_value = method_value_scan_start.waiting_method_value;
+                reading_method_value = method_value_scan_start.reading_method_value;
+                initialize_value_match = method_value_scan_start.initialize_value_match;
+                shutdown_value_match = method_value_scan_start.shutdown_value_match;
+                exit_value_match = method_value_scan_start.exit_value_match;
               } else {
                 let method_value_scan_fallback = fallback_smoke_method_value_scan(value);
                 waiting_method_value = method_value_scan_fallback.waiting_method_value;
@@ -361,6 +362,14 @@ struct SmokeMethodValueWaitFallback {
 struct SmokeMethodValueScanFallback {
   waiting_method_value: bool,
   method_key_match: i64,
+}
+
+struct SmokeMethodValueScanStart {
+  waiting_method_value: bool,
+  reading_method_value: bool,
+  initialize_value_match: i64,
+  shutdown_value_match: i64,
+  exit_value_match: i64,
 }
 
 struct SmokeRequestIdValueScanReset {
@@ -777,6 +786,16 @@ fn fallback_smoke_method_value_scan(value: u8) -> SmokeMethodValueScanFallback {
   return SmokeMethodValueScanFallback {
     waiting_method_value: false,
     method_key_match: next_method_key_match_index(value, 0),
+  };
+}
+
+fn start_smoke_method_value_scan() -> SmokeMethodValueScanStart {
+  return SmokeMethodValueScanStart {
+    waiting_method_value: false,
+    reading_method_value: true,
+    initialize_value_match: 0,
+    shutdown_value_match: 0,
+    exit_value_match: 0,
   };
 }
 
