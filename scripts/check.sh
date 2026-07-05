@@ -75,6 +75,7 @@ require_grep "next_content_length_header_match_index" src/json_rpc.ari
 require_grep "next_header_end_match_index" src/json_rpc.ari
 require_grep "scan_content_length_header_start" src/json_rpc.ari
 require_grep "scan_content_length_digit" src/json_rpc.ari
+require_grep "scan_content_length_header_end" src/json_rpc.ari
 require_grep "complete_frame_count >= 3" src/json_rpc.ari
 require_grep "next_id_key_match_index" src/json_rpc.ari
 require_grep "next_method_key_match_index" src/json_rpc.ari
@@ -114,6 +115,7 @@ require_grep "body_end_frame_state.frame_progress" src/json_rpc.ari
 require_grep "body_end_scan_reset.header_scan" src/json_rpc.ari
 require_grep "scanned_header_start.content_length_match" src/json_rpc.ari
 require_grep "pending_content_length = digit_header_scan.pending_content_length" src/json_rpc.ari
+require_grep "header_end_match = header_end_scan.header_end_match" src/json_rpc.ari
 require_grep "body_remaining = parsed_frame_progress.body_remaining" src/json_rpc.ari
 require_grep "Content-Length: 53" src/json_rpc.ari
 require_grep "Content-Length: 38" src/json_rpc.ari

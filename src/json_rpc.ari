@@ -221,7 +221,20 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             pending_content_length = digit_header_scan.pending_content_length;
             header_end_match = digit_header_scan.header_end_match;
           } else {
-            header_end_match = next_header_end_match_index(value, header_end_match);
+            let header_end_scan = scan_content_length_header_end(
+              value,
+              ContentLengthHeaderScanState {
+                content_length_match: content_length_match,
+                reading_content_length: reading_content_length,
+                saw_content_length_digit: saw_content_length_digit,
+                pending_content_length: pending_content_length,
+                header_end_match: header_end_match,
+              });
+            content_length_match = header_end_scan.content_length_match;
+            reading_content_length = header_end_scan.reading_content_length;
+            saw_content_length_digit = header_end_scan.saw_content_length_digit;
+            pending_content_length = header_end_scan.pending_content_length;
+            header_end_match = header_end_scan.header_end_match;
             let parsed_content_length = finalize_content_length_parse(
               saw_content_length_digit,
               pending_content_length,
@@ -602,6 +615,16 @@ fn scan_content_length_digit(value: u8, scan: ContentLengthHeaderScanState) -> C
     saw_content_length_digit: true,
     pending_content_length: scan.pending_content_length * 10 + ascii_digit_value(value),
     header_end_match: 0,
+  };
+}
+
+fn scan_content_length_header_end(value: u8, scan: ContentLengthHeaderScanState) -> ContentLengthHeaderScanState {
+  return ContentLengthHeaderScanState {
+    content_length_match: scan.content_length_match,
+    reading_content_length: scan.reading_content_length,
+    saw_content_length_digit: scan.saw_content_length_digit,
+    pending_content_length: scan.pending_content_length,
+    header_end_match: next_header_end_match_index(value, scan.header_end_match),
   };
 }
 
