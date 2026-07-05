@@ -239,22 +239,28 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               saw_content_length_digit,
               pending_content_length,
               header_end_match);
-            let parsed_frame_progress = apply_content_length_parse_to_frame_progress(
+            let parsed_header_state = apply_content_length_parse_to_header_state(
               parsed_content_length,
+              ContentLengthHeaderScanState {
+                content_length_match: content_length_match,
+                reading_content_length: reading_content_length,
+                saw_content_length_digit: saw_content_length_digit,
+                pending_content_length: pending_content_length,
+                header_end_match: header_end_match,
+              },
               JsonRpcFrameProgress {
                 body_remaining: body_remaining,
                 complete_frame_count: complete_frame_count,
               });
+            let parsed_header_scan = parsed_header_state.header_scan;
+            content_length_match = parsed_header_scan.content_length_match;
+            reading_content_length = parsed_header_scan.reading_content_length;
+            saw_content_length_digit = parsed_header_scan.saw_content_length_digit;
+            pending_content_length = parsed_header_scan.pending_content_length;
+            header_end_match = parsed_header_scan.header_end_match;
+            let parsed_frame_progress = parsed_header_state.frame_progress;
             body_remaining = parsed_frame_progress.body_remaining;
             complete_frame_count = parsed_frame_progress.complete_frame_count;
-            if parsed_content_length.present {
-              let header_end_header_scan = initial_content_length_header_scan_state();
-              content_length_match = header_end_header_scan.content_length_match;
-              reading_content_length = header_end_header_scan.reading_content_length;
-              saw_content_length_digit = header_end_header_scan.saw_content_length_digit;
-              pending_content_length = header_end_header_scan.pending_content_length;
-              header_end_match = header_end_header_scan.header_end_match;
-            }
           }
         } else {
           let scanned_header_start = scan_content_length_header_start(
@@ -348,6 +354,11 @@ struct ContentLengthHeaderScanState {
 struct ContentLengthParseResult {
   present: bool,
   length: i64,
+}
+
+struct ParsedContentLengthHeaderState {
+  header_scan: ContentLengthHeaderScanState,
+  frame_progress: JsonRpcFrameProgress,
 }
 
 struct SmokeProtocolState {
@@ -693,6 +704,22 @@ fn apply_content_length_parse_to_frame_progress(
   return JsonRpcFrameProgress {
     body_remaining: parsed_content_length.length,
     complete_frame_count: progress.complete_frame_count,
+  };
+}
+
+fn apply_content_length_parse_to_header_state(
+  parsed_content_length: ContentLengthParseResult,
+  header_scan: ContentLengthHeaderScanState,
+  frame_progress: JsonRpcFrameProgress) -> ParsedContentLengthHeaderState {
+  if !parsed_content_length.present {
+    return ParsedContentLengthHeaderState {
+      header_scan: header_scan,
+      frame_progress: frame_progress,
+    };
+  }
+  return ParsedContentLengthHeaderState {
+    header_scan: initial_content_length_header_scan_state(),
+    frame_progress: apply_content_length_parse_to_frame_progress(parsed_content_length, frame_progress),
   };
 }
 
