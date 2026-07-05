@@ -30,7 +30,7 @@ implementation work.
   modules that return 0.
 - JSON-RPC request parsing and general Language Server Protocol handling are
   not implemented here yet. A minimal stdin EOF loop and Content-Length
-  frame-count plus method/id-field-gated fixed protocol smoke response
+  frame-count plus method/id-field-gated fixed-result protocol smoke response
   scaffold exist.
 - Local build and smoke scripts require an explicit Ari compiler path.
 - Compiler-free repository-shape validation is available through
