@@ -65,9 +65,14 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               shutdown_value_match = method_value_scan_reset.shutdown_value_match;
               exit_value_match = method_value_scan_reset.exit_value_match;
             } else {
-              initialize_value_match = next_initialize_method_value_match_index(value, initialize_value_match);
-              shutdown_value_match = next_shutdown_method_value_match_index(value, shutdown_value_match);
-              exit_value_match = next_exit_method_value_match_index(value, exit_value_match);
+              let method_value_scan_update = scan_smoke_method_value_byte(
+                value,
+                initialize_value_match,
+                shutdown_value_match,
+                exit_value_match);
+              initialize_value_match = method_value_scan_update.initialize_value_match;
+              shutdown_value_match = method_value_scan_update.shutdown_value_match;
+              exit_value_match = method_value_scan_update.exit_value_match;
             }
           } else if waiting_method_value {
             if !is_json_whitespace(value) {
@@ -367,6 +372,12 @@ struct SmokeMethodValueScanFallback {
 struct SmokeMethodValueScanStart {
   waiting_method_value: bool,
   reading_method_value: bool,
+  initialize_value_match: i64,
+  shutdown_value_match: i64,
+  exit_value_match: i64,
+}
+
+struct SmokeMethodValueScanUpdate {
   initialize_value_match: i64,
   shutdown_value_match: i64,
   exit_value_match: i64,
@@ -796,6 +807,18 @@ fn start_smoke_method_value_scan() -> SmokeMethodValueScanStart {
     initialize_value_match: 0,
     shutdown_value_match: 0,
     exit_value_match: 0,
+  };
+}
+
+fn scan_smoke_method_value_byte(
+  value: u8,
+  initialize_value_match: i64,
+  shutdown_value_match: i64,
+  exit_value_match: i64) -> SmokeMethodValueScanUpdate {
+  return SmokeMethodValueScanUpdate {
+    initialize_value_match: next_initialize_method_value_match_index(value, initialize_value_match),
+    shutdown_value_match: next_shutdown_method_value_match_index(value, shutdown_value_match),
+    exit_value_match: next_exit_method_value_match_index(value, exit_value_match),
   };
 }
 
