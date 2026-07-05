@@ -12,24 +12,25 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
   var header_end_match = 0;
   var body_remaining = 0;
   var complete_frame_count = 0;
-  var method_key_match = 0;
-  var waiting_method_colon = false;
-  var waiting_method_value = false;
-  var reading_method_value = false;
-  var initialize_value_match = 0;
-  var shutdown_value_match = 0;
-  var exit_value_match = 0;
-  var id_key_match = 0;
-  var waiting_id_colon = false;
-  var waiting_id_value = false;
-  var reading_id_value = false;
-  var id_value = 0;
-  var saw_id_digit = false;
-  var frame_saw_initialize_method = false;
-  var frame_saw_shutdown_method = false;
-  var frame_saw_exit_method = false;
-  var frame_saw_request_id = false;
-  var frame_request_id = 0;
+  let initial_frame_scan = initial_smoke_frame_scan_state();
+  var method_key_match = initial_frame_scan.method_key_match;
+  var waiting_method_colon = initial_frame_scan.waiting_method_colon;
+  var waiting_method_value = initial_frame_scan.waiting_method_value;
+  var reading_method_value = initial_frame_scan.reading_method_value;
+  var initialize_value_match = initial_frame_scan.initialize_value_match;
+  var shutdown_value_match = initial_frame_scan.shutdown_value_match;
+  var exit_value_match = initial_frame_scan.exit_value_match;
+  var id_key_match = initial_frame_scan.id_key_match;
+  var waiting_id_colon = initial_frame_scan.waiting_id_colon;
+  var waiting_id_value = initial_frame_scan.waiting_id_value;
+  var reading_id_value = initial_frame_scan.reading_id_value;
+  var id_value = initial_frame_scan.id_value;
+  var saw_id_digit = initial_frame_scan.saw_id_digit;
+  var frame_saw_initialize_method = initial_frame_scan.saw_initialize_method;
+  var frame_saw_shutdown_method = initial_frame_scan.saw_shutdown_method;
+  var frame_saw_exit_method = initial_frame_scan.saw_exit_method;
+  var frame_saw_request_id = initial_frame_scan.saw_request_id;
+  var frame_request_id = initial_frame_scan.request_id;
   var saw_initialize_request = false;
   var saw_shutdown_request = false;
   var saw_exit_notification = false;
@@ -166,24 +167,25 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             saw_content_length_digit = false;
             pending_content_length = 0;
             header_end_match = 0;
-            method_key_match = 0;
-            waiting_method_colon = false;
-            waiting_method_value = false;
-            reading_method_value = false;
-            initialize_value_match = 0;
-            shutdown_value_match = 0;
-            exit_value_match = 0;
-            id_key_match = 0;
-            waiting_id_colon = false;
-            waiting_id_value = false;
-            reading_id_value = false;
-            id_value = 0;
-            saw_id_digit = false;
-            frame_saw_initialize_method = false;
-            frame_saw_shutdown_method = false;
-            frame_saw_exit_method = false;
-            frame_saw_request_id = false;
-            frame_request_id = 0;
+            let next_frame_scan = initial_smoke_frame_scan_state();
+            method_key_match = next_frame_scan.method_key_match;
+            waiting_method_colon = next_frame_scan.waiting_method_colon;
+            waiting_method_value = next_frame_scan.waiting_method_value;
+            reading_method_value = next_frame_scan.reading_method_value;
+            initialize_value_match = next_frame_scan.initialize_value_match;
+            shutdown_value_match = next_frame_scan.shutdown_value_match;
+            exit_value_match = next_frame_scan.exit_value_match;
+            id_key_match = next_frame_scan.id_key_match;
+            waiting_id_colon = next_frame_scan.waiting_id_colon;
+            waiting_id_value = next_frame_scan.waiting_id_value;
+            reading_id_value = next_frame_scan.reading_id_value;
+            id_value = next_frame_scan.id_value;
+            saw_id_digit = next_frame_scan.saw_id_digit;
+            frame_saw_initialize_method = next_frame_scan.saw_initialize_method;
+            frame_saw_shutdown_method = next_frame_scan.saw_shutdown_method;
+            frame_saw_exit_method = next_frame_scan.saw_exit_method;
+            frame_saw_request_id = next_frame_scan.saw_request_id;
+            frame_request_id = next_frame_scan.request_id;
           }
         } else if reading_content_length {
           if is_ascii_digit(value) {
@@ -251,6 +253,27 @@ struct CompletedSmokeFrame {
   saw_shutdown_request: bool,
   shutdown_request_id: i64,
   saw_exit_notification: bool,
+}
+
+struct SmokeFrameScanState {
+  method_key_match: i64,
+  waiting_method_colon: bool,
+  waiting_method_value: bool,
+  reading_method_value: bool,
+  initialize_value_match: i64,
+  shutdown_value_match: i64,
+  exit_value_match: i64,
+  id_key_match: i64,
+  waiting_id_colon: bool,
+  waiting_id_value: bool,
+  reading_id_value: bool,
+  id_value: i64,
+  saw_id_digit: bool,
+  saw_initialize_method: bool,
+  saw_shutdown_method: bool,
+  saw_exit_method: bool,
+  saw_request_id: bool,
+  request_id: i64,
 }
 
 fn next_id_key_match_index(value: u8, index: i64) -> i64 {
@@ -501,6 +524,29 @@ fn complete_smoke_frame(
     saw_shutdown_request: saw_shutdown_request,
     shutdown_request_id: shutdown_request_id,
     saw_exit_notification: frame_saw_exit_method,
+  };
+}
+
+fn initial_smoke_frame_scan_state() -> SmokeFrameScanState {
+  return SmokeFrameScanState {
+    method_key_match: 0,
+    waiting_method_colon: false,
+    waiting_method_value: false,
+    reading_method_value: false,
+    initialize_value_match: 0,
+    shutdown_value_match: 0,
+    exit_value_match: 0,
+    id_key_match: 0,
+    waiting_id_colon: false,
+    waiting_id_value: false,
+    reading_id_value: false,
+    id_value: 0,
+    saw_id_digit: false,
+    saw_initialize_method: false,
+    saw_shutdown_method: false,
+    saw_exit_method: false,
+    saw_request_id: false,
+    request_id: 0,
   };
 }
 
