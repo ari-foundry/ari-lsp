@@ -161,17 +161,20 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               initialize_request_id: initialize_request_id,
               shutdown_request_id: shutdown_request_id,
             };
-            let applied_protocol_state = apply_completed_smoke_frame_to_protocol_state(current_protocol_state, completed_frame);
+            let body_end_frame_state = apply_completed_smoke_frame_to_body_end_state(
+              current_protocol_state,
+              JsonRpcFrameProgress {
+                body_remaining: body_remaining,
+                complete_frame_count: complete_frame_count,
+              },
+              completed_frame);
+            let applied_protocol_state = body_end_frame_state.protocol_state;
             saw_initialize_request = applied_protocol_state.saw_initialize_request;
             saw_shutdown_request = applied_protocol_state.saw_shutdown_request;
             saw_exit_notification = applied_protocol_state.saw_exit_notification;
             initialize_request_id = applied_protocol_state.initialize_request_id;
             shutdown_request_id = applied_protocol_state.shutdown_request_id;
-            let body_end_frame_progress = JsonRpcFrameProgress {
-              body_remaining: body_remaining,
-              complete_frame_count: complete_frame_count,
-            };
-            let body_end_completed_progress = complete_json_rpc_frame(body_end_frame_progress);
+            let body_end_completed_progress = body_end_frame_state.frame_progress;
             body_remaining = body_end_completed_progress.body_remaining;
             complete_frame_count = body_end_completed_progress.complete_frame_count;
             let frame_end_header_scan = initial_content_length_header_scan_state();
@@ -322,6 +325,11 @@ struct SmokeProtocolState {
   saw_exit_notification: bool,
   initialize_request_id: i64,
   shutdown_request_id: i64,
+}
+
+struct BodyEndSmokeFrameState {
+  protocol_state: SmokeProtocolState,
+  frame_progress: JsonRpcFrameProgress,
 }
 
 fn next_id_key_match_index(value: u8, index: i64) -> i64 {
@@ -574,6 +582,16 @@ fn complete_json_rpc_frame(progress: JsonRpcFrameProgress) -> JsonRpcFrameProgre
   return JsonRpcFrameProgress {
     body_remaining: 0,
     complete_frame_count: progress.complete_frame_count + 1,
+  };
+}
+
+fn apply_completed_smoke_frame_to_body_end_state(
+  protocol_state: SmokeProtocolState,
+  frame_progress: JsonRpcFrameProgress,
+  completed_frame: CompletedSmokeFrame) -> BodyEndSmokeFrameState {
+  return BodyEndSmokeFrameState {
+    protocol_state: apply_completed_smoke_frame_to_protocol_state(protocol_state, completed_frame),
+    frame_progress: complete_json_rpc_frame(frame_progress),
   };
 }
 
