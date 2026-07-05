@@ -145,8 +145,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
           } else {
             id_key_match = next_id_key_match_index(value, id_key_match);
             if id_key_match == 4 {
-              waiting_id_colon = true;
-              id_key_match = 0;
+              let request_id_colon_wait_start = start_smoke_request_id_colon_wait();
+              waiting_id_colon = request_id_colon_wait_start.waiting_id_colon;
+              id_key_match = request_id_colon_wait_start.id_key_match;
             }
           }
 
@@ -363,6 +364,11 @@ struct SmokeRequestIdValueWaitStart {
 }
 
 struct SmokeRequestIdValueWaitFallback {
+  waiting_id_colon: bool,
+  id_key_match: i64,
+}
+
+struct SmokeRequestIdColonWaitStart {
   waiting_id_colon: bool,
   id_key_match: i64,
 }
@@ -758,6 +764,13 @@ fn fallback_smoke_request_id_value_wait(value: u8) -> SmokeRequestIdValueWaitFal
   return SmokeRequestIdValueWaitFallback {
     waiting_id_colon: false,
     id_key_match: next_id_key_match_index(value, 0),
+  };
+}
+
+fn start_smoke_request_id_colon_wait() -> SmokeRequestIdColonWaitStart {
+  return SmokeRequestIdColonWaitStart {
+    waiting_id_colon: true,
+    id_key_match: 0,
   };
 }
 
