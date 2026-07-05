@@ -95,8 +95,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
           } else {
             method_key_match = next_method_key_match_index(value, method_key_match);
             if method_key_match == 8 {
-              waiting_method_colon = true;
-              method_key_match = 0;
+              let method_colon_wait_start = start_smoke_method_colon_wait();
+              waiting_method_colon = method_colon_wait_start.waiting_method_colon;
+              method_key_match = method_colon_wait_start.method_key_match;
             }
           }
 
@@ -337,6 +338,11 @@ struct SmokeMethodValueScanReset {
   initialize_value_match: i64,
   shutdown_value_match: i64,
   exit_value_match: i64,
+}
+
+struct SmokeMethodColonWaitStart {
+  waiting_method_colon: bool,
+  method_key_match: i64,
 }
 
 struct SmokeRequestIdValueScanReset {
@@ -725,6 +731,13 @@ fn reset_smoke_method_value_scan() -> SmokeMethodValueScanReset {
     initialize_value_match: 0,
     shutdown_value_match: 0,
     exit_value_match: 0,
+  };
+}
+
+fn start_smoke_method_colon_wait() -> SmokeMethodColonWaitStart {
+  return SmokeMethodColonWaitStart {
+    waiting_method_colon: true,
+    method_key_match: 0,
   };
 }
 
