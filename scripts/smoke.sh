@@ -102,12 +102,12 @@ protocol_stderr="$tmp_dir/protocol-stderr"
 protocol_expected="$tmp_dir/protocol-expected"
 
 {
-  printf 'Content-Length: 58\r\n\r\n'
-  printf '%s' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'
-  printf 'Content-Length: 44\r\n\r\n'
-  printf '%s' '{"jsonrpc":"2.0","id":2,"method":"shutdown"}'
-  printf 'Content-Length: 33\r\n\r\n'
-  printf '%s' '{"jsonrpc":"2.0","method":"exit"}'
+  printf 'Content-Length: 60\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id":1,"method" : "initialize","params":{}}'
+  printf 'Content-Length: 46\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id":2,"method" : "shutdown"}'
+  printf 'Content-Length: 35\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","method" : "exit"}'
 } > "$protocol_input"
 
 {
