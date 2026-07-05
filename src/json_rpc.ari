@@ -114,16 +114,18 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               id_value = id_value * 10 + ascii_digit_value(value);
               saw_id_digit = true;
             } else {
-              let scanned_request_id = finalize_scanned_smoke_request_id(saw_id_digit, id_value);
-              if scanned_request_id.present {
+              let request_id_value_scan_finish = finish_smoke_request_id_value_scan(
+                value,
+                saw_id_digit,
+                id_value);
+              if request_id_value_scan_finish.present {
                 frame_saw_request_id = true;
-                frame_request_id = scanned_request_id.value;
+                frame_request_id = request_id_value_scan_finish.request_id;
               }
-              let request_id_value_scan_reset = reset_smoke_request_id_value_scan(value);
-              reading_id_value = request_id_value_scan_reset.reading_id_value;
-              id_value = request_id_value_scan_reset.id_value;
-              saw_id_digit = request_id_value_scan_reset.saw_id_digit;
-              id_key_match = request_id_value_scan_reset.id_key_match;
+              reading_id_value = request_id_value_scan_finish.reading_id_value;
+              id_value = request_id_value_scan_finish.id_value;
+              saw_id_digit = request_id_value_scan_finish.saw_id_digit;
+              id_key_match = request_id_value_scan_finish.id_key_match;
             }
           } else if waiting_id_value {
             if !is_json_whitespace(value) {
@@ -394,6 +396,15 @@ struct SmokeMethodValueScanUpdate {
 }
 
 struct SmokeRequestIdValueScanReset {
+  reading_id_value: bool,
+  id_value: i64,
+  saw_id_digit: bool,
+  id_key_match: i64,
+}
+
+struct SmokeRequestIdValueScanFinish {
+  present: bool,
+  request_id: i64,
   reading_id_value: bool,
   id_value: i64,
   saw_id_digit: bool,
@@ -859,6 +870,22 @@ fn reset_smoke_request_id_value_scan(value: u8) -> SmokeRequestIdValueScanReset 
     id_value: 0,
     saw_id_digit: false,
     id_key_match: next_id_key_match_index(value, 0),
+  };
+}
+
+fn finish_smoke_request_id_value_scan(
+  value: u8,
+  saw_id_digit: bool,
+  id_value: i64) -> SmokeRequestIdValueScanFinish {
+  let scanned_request_id = finalize_scanned_smoke_request_id(saw_id_digit, id_value);
+  let request_id_value_scan_reset = reset_smoke_request_id_value_scan(value);
+  return SmokeRequestIdValueScanFinish {
+    present: scanned_request_id.present,
+    request_id: scanned_request_id.value,
+    reading_id_value: request_id_value_scan_reset.reading_id_value,
+    id_value: request_id_value_scan_reset.id_value,
+    saw_id_digit: request_id_value_scan_reset.saw_id_digit,
+    id_key_match: request_id_value_scan_reset.id_key_match,
   };
 }
 
