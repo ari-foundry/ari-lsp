@@ -9,11 +9,11 @@ stdin until EOF, flushes stdout at EOF, and returns 0 for clean EOF. Empty
 stdin, non-protocol stdin, incomplete framed stdin, and framed stdin without the
 smoke method fields and supported one-digit request ids emit no protocol
 messages. Framed smoke-shaped messages with unsupported multi-digit request ids
-also emit no protocol messages. The local protocol smoke stream gets
-fixed-result initialize and shutdown responses after the scaffold observes
-three complete Content-Length-framed messages containing `method` string fields
-for `initialize`, `shutdown`, and `exit`, with one-digit numeric `id` fields
-for the initialize and shutdown smoke requests.
+or string request ids also emit no protocol messages. The local protocol smoke
+stream gets fixed-result initialize and shutdown responses after the scaffold
+observes three complete Content-Length-framed messages containing `method`
+string fields for `initialize`, `shutdown`, and `exit`, with one-digit numeric
+`id` fields for the initialize and shutdown smoke requests.
 
 ## Current Status
 
@@ -30,6 +30,8 @@ for the initialize and shutdown smoke requests.
   payloads and copied one-digit ids; `exit` produces no response.
 - Multi-digit request ids are deliberately unsupported by the current smoke
   scaffold and stay quiet.
+- String request ids are deliberately unsupported by the current smoke scaffold
+  and stay quiet.
 - No complete JSON-RPC framing or body parsing is implemented.
 - General JSON-RPC request-id propagation is not implemented.
 - No general Language Server Protocol method dispatch is implemented.

@@ -142,6 +142,29 @@ set -e
 [ ! -s "$unsupported_id_stdout" ] || fail "expected no stdout from unsupported-id framed stdin smoke"
 [ ! -s "$unsupported_id_stderr" ] || fail "expected no stderr from unsupported-id framed stdin smoke"
 
+string_id_input="$tmp_dir/string-id-input"
+string_id_stdout="$tmp_dir/string-id-stdout"
+string_id_stderr="$tmp_dir/string-id-stderr"
+
+{
+  printf 'Content-Length: 66\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id" : "abc","method" : "initialize","params":{}}'
+  printf 'Content-Length: 52\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id" : "abc","method" : "shutdown"}'
+  printf 'Content-Length: 35\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","method" : "exit"}'
+} > "$string_id_input"
+
+printf '%s\n' "smoke.sh: running string-id framed stdin smoke"
+set +e
+"$binary" < "$string_id_input" > "$string_id_stdout" 2> "$string_id_stderr"
+string_id_status=$?
+set -e
+
+[ "$string_id_status" -eq 0 ] || fail "expected string-id framed smoke exit status 0, got $string_id_status"
+[ ! -s "$string_id_stdout" ] || fail "expected no stdout from string-id framed stdin smoke"
+[ ! -s "$string_id_stderr" ] || fail "expected no stderr from string-id framed stdin smoke"
+
 protocol_input="$tmp_dir/protocol-input"
 protocol_stdout="$tmp_dir/protocol-stdout"
 protocol_stderr="$tmp_dir/protocol-stderr"

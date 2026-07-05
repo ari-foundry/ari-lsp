@@ -110,11 +110,15 @@ require_grep "incomplete-frame stdin smoke" scripts/smoke.sh
 require_grep "method-free framed stdin smoke" scripts/smoke.sh
 require_grep "request-id-free framed stdin smoke" scripts/smoke.sh
 require_grep "unsupported-id framed stdin smoke" scripts/smoke.sh
+require_grep "string-id framed stdin smoke" scripts/smoke.sh
 require_grep "protocol smoke" scripts/smoke.sh
+require_grep "Content-Length: 66" scripts/smoke.sh
+require_grep "Content-Length: 52" scripts/smoke.sh
 require_grep "Content-Length: 63" scripts/smoke.sh
 require_grep "Content-Length: 49" scripts/smoke.sh
 require_grep "Content-Length: 62" scripts/smoke.sh
 require_grep "Content-Length: 48" scripts/smoke.sh
+require_grep '"id" : "abc"' scripts/smoke.sh
 require_grep '"id" : 17' scripts/smoke.sh
 require_grep '"id" : 18' scripts/smoke.sh
 require_grep '"id" : 7' scripts/smoke.sh
