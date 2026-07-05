@@ -6,18 +6,20 @@ This document records the protocol boundary for the initial split workspace.
 
 A minimal JSON-RPC stdio loop scaffold exists in this repository. It reads
 stdin until EOF, flushes stdout at EOF, and returns 0 for clean EOF. Empty
-stdin emits no protocol messages; the local protocol smoke stream gets fixed
-initialize and shutdown responses.
+stdin and non-protocol stdin emit no protocol messages; the local protocol
+smoke stream gets fixed initialize and shutdown responses after the scaffold
+observes the expected Content-Length headers.
 
 ## Current Status
 
 - `src/main.ari` routes through placeholder server, config, JSON-RPC,
   protocol, and transport modules.
 - The JSON-RPC loop currently reads stdin byte-by-byte until EOF and flushes
-  stdout.
-- For the local protocol smoke stream only, non-empty stdin produces a fixed
-  initialize response and fixed shutdown response; `exit` produces no response.
-- No JSON-RPC framing is implemented.
+  stdout. While reading, it counts `Content-Length` header markers.
+- For the local protocol smoke stream only, three observed Content-Length
+  headers produce a fixed initialize response and fixed shutdown response;
+  `exit` produces no response.
+- No complete JSON-RPC framing or body parsing is implemented.
 - No general Language Server Protocol method dispatch is implemented.
 - Protocol compatibility is not claimed by this scaffold.
 
@@ -65,7 +67,8 @@ When protocol behavior moves here, it should be added in small, testable steps:
 
 ## Non-Goals
 
-- Do not implement JSON-RPC framing or request parsing in this scaffold step.
+- Do not implement complete JSON-RPC framing or request parsing in this
+  scaffold step.
 - Do not claim general JSON-RPC message handling in this scaffold step.
 - Do not claim parity with bundled `tools/lsp`.
 - Do not claim replacement status for `ari-foundry/ari/tools/lsp`.
