@@ -78,8 +78,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
                 shutdown_value_match = 0;
                 exit_value_match = 0;
               } else {
-                waiting_method_value = false;
-                method_key_match = next_method_key_match_index(value, 0);
+                let method_value_scan_fallback = fallback_smoke_method_value_scan(value);
+                waiting_method_value = method_value_scan_fallback.waiting_method_value;
+                method_key_match = method_value_scan_fallback.method_key_match;
               }
             }
           } else if waiting_method_colon {
@@ -354,6 +355,11 @@ struct SmokeMethodValueWaitStart {
 
 struct SmokeMethodValueWaitFallback {
   waiting_method_colon: bool,
+  method_key_match: i64,
+}
+
+struct SmokeMethodValueScanFallback {
+  waiting_method_value: bool,
   method_key_match: i64,
 }
 
@@ -763,6 +769,13 @@ fn start_smoke_method_value_wait() -> SmokeMethodValueWaitStart {
 fn fallback_smoke_method_value_wait(value: u8) -> SmokeMethodValueWaitFallback {
   return SmokeMethodValueWaitFallback {
     waiting_method_colon: false,
+    method_key_match: next_method_key_match_index(value, 0),
+  };
+}
+
+fn fallback_smoke_method_value_scan(value: u8) -> SmokeMethodValueScanFallback {
+  return SmokeMethodValueScanFallback {
+    waiting_method_value: false,
     method_key_match: next_method_key_match_index(value, 0),
   };
 }
