@@ -41,6 +41,22 @@ set -e
 [ ! -s "$stdout_file" ] || fail "expected no stdout from minimal entrypoint"
 [ ! -s "$stderr_file" ] || fail "expected no stderr from minimal entrypoint"
 
+non_protocol_input="$tmp_dir/non-protocol-input"
+non_protocol_stdout="$tmp_dir/non-protocol-stdout"
+non_protocol_stderr="$tmp_dir/non-protocol-stderr"
+
+printf '%s' 'not-json-rpc' > "$non_protocol_input"
+
+printf '%s\n' "smoke.sh: running non-protocol stdin smoke"
+set +e
+"$binary" < "$non_protocol_input" > "$non_protocol_stdout" 2> "$non_protocol_stderr"
+non_protocol_status=$?
+set -e
+
+[ "$non_protocol_status" -eq 0 ] || fail "expected non-protocol smoke exit status 0, got $non_protocol_status"
+[ ! -s "$non_protocol_stdout" ] || fail "expected no stdout from non-protocol stdin smoke"
+[ ! -s "$non_protocol_stderr" ] || fail "expected no stderr from non-protocol stdin smoke"
+
 protocol_input="$tmp_dir/protocol-input"
 protocol_stdout="$tmp_dir/protocol-stdout"
 protocol_stderr="$tmp_dir/protocol-stderr"
