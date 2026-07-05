@@ -12,10 +12,32 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
   var header_end_match = 0;
   var body_remaining = 0;
   var complete_frame_count = 0;
+  var initialize_method_match = 0;
+  var shutdown_method_match = 0;
+  var exit_method_match = 0;
+  var saw_initialize_method = false;
+  var saw_shutdown_method = false;
+  var saw_exit_method = false;
   while true {
     match std::io::read_one<std::io::Stdin>(input) {
       std::io::ReadByteValue(value) => {
         if body_remaining > 0 {
+          initialize_method_match = next_initialize_method_match_index(value, initialize_method_match);
+          if initialize_method_match == 21 {
+            saw_initialize_method = true;
+            initialize_method_match = 0;
+          }
+          shutdown_method_match = next_shutdown_method_match_index(value, shutdown_method_match);
+          if shutdown_method_match == 19 {
+            saw_shutdown_method = true;
+            shutdown_method_match = 0;
+          }
+          exit_method_match = next_exit_method_match_index(value, exit_method_match);
+          if exit_method_match == 15 {
+            saw_exit_method = true;
+            exit_method_match = 0;
+          }
+
           body_remaining = body_remaining - 1;
           if body_remaining == 0 {
             complete_frame_count = complete_frame_count + 1;
@@ -24,6 +46,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             saw_content_length_digit = false;
             pending_content_length = 0;
             header_end_match = 0;
+            initialize_method_match = 0;
+            shutdown_method_match = 0;
+            exit_method_match = 0;
           }
         } else if reading_content_length {
           if is_ascii_digit(value) {
@@ -56,7 +81,7 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
         }
       }
       std::io::ReadByteEof => {
-        if complete_frame_count >= 3 {
+        if complete_frame_count >= 3 && saw_initialize_method && saw_shutdown_method && saw_exit_method {
           let write_status = write_protocol_smoke_responses(output);
           if write_status != 0 {
             return write_status;
@@ -77,6 +102,192 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
     }
   }
 
+  return 0;
+}
+
+fn next_initialize_method_match_index(value: u8, index: i64) -> i64 {
+  if index == 0 && value == 34u8 {
+    return 1;
+  }
+  if index == 1 && value == 109u8 {
+    return 2;
+  }
+  if index == 2 && value == 101u8 {
+    return 3;
+  }
+  if index == 3 && value == 116u8 {
+    return 4;
+  }
+  if index == 4 && value == 104u8 {
+    return 5;
+  }
+  if index == 5 && value == 111u8 {
+    return 6;
+  }
+  if index == 6 && value == 100u8 {
+    return 7;
+  }
+  if index == 7 && value == 34u8 {
+    return 8;
+  }
+  if index == 8 && value == 58u8 {
+    return 9;
+  }
+  if index == 9 && value == 34u8 {
+    return 10;
+  }
+  if index == 10 && value == 105u8 {
+    return 11;
+  }
+  if index == 11 && value == 110u8 {
+    return 12;
+  }
+  if index == 12 && value == 105u8 {
+    return 13;
+  }
+  if index == 13 && value == 116u8 {
+    return 14;
+  }
+  if index == 14 && value == 105u8 {
+    return 15;
+  }
+  if index == 15 && value == 97u8 {
+    return 16;
+  }
+  if index == 16 && value == 108u8 {
+    return 17;
+  }
+  if index == 17 && value == 105u8 {
+    return 18;
+  }
+  if index == 18 && value == 122u8 {
+    return 19;
+  }
+  if index == 19 && value == 101u8 {
+    return 20;
+  }
+  if index == 20 && value == 34u8 {
+    return 21;
+  }
+  if value == 34u8 {
+    return 1;
+  }
+  return 0;
+}
+
+fn next_shutdown_method_match_index(value: u8, index: i64) -> i64 {
+  if index == 0 && value == 34u8 {
+    return 1;
+  }
+  if index == 1 && value == 109u8 {
+    return 2;
+  }
+  if index == 2 && value == 101u8 {
+    return 3;
+  }
+  if index == 3 && value == 116u8 {
+    return 4;
+  }
+  if index == 4 && value == 104u8 {
+    return 5;
+  }
+  if index == 5 && value == 111u8 {
+    return 6;
+  }
+  if index == 6 && value == 100u8 {
+    return 7;
+  }
+  if index == 7 && value == 34u8 {
+    return 8;
+  }
+  if index == 8 && value == 58u8 {
+    return 9;
+  }
+  if index == 9 && value == 34u8 {
+    return 10;
+  }
+  if index == 10 && value == 115u8 {
+    return 11;
+  }
+  if index == 11 && value == 104u8 {
+    return 12;
+  }
+  if index == 12 && value == 117u8 {
+    return 13;
+  }
+  if index == 13 && value == 116u8 {
+    return 14;
+  }
+  if index == 14 && value == 100u8 {
+    return 15;
+  }
+  if index == 15 && value == 111u8 {
+    return 16;
+  }
+  if index == 16 && value == 119u8 {
+    return 17;
+  }
+  if index == 17 && value == 110u8 {
+    return 18;
+  }
+  if index == 18 && value == 34u8 {
+    return 19;
+  }
+  if value == 34u8 {
+    return 1;
+  }
+  return 0;
+}
+
+fn next_exit_method_match_index(value: u8, index: i64) -> i64 {
+  if index == 0 && value == 34u8 {
+    return 1;
+  }
+  if index == 1 && value == 109u8 {
+    return 2;
+  }
+  if index == 2 && value == 101u8 {
+    return 3;
+  }
+  if index == 3 && value == 116u8 {
+    return 4;
+  }
+  if index == 4 && value == 104u8 {
+    return 5;
+  }
+  if index == 5 && value == 111u8 {
+    return 6;
+  }
+  if index == 6 && value == 100u8 {
+    return 7;
+  }
+  if index == 7 && value == 34u8 {
+    return 8;
+  }
+  if index == 8 && value == 58u8 {
+    return 9;
+  }
+  if index == 9 && value == 34u8 {
+    return 10;
+  }
+  if index == 10 && value == 101u8 {
+    return 11;
+  }
+  if index == 11 && value == 120u8 {
+    return 12;
+  }
+  if index == 12 && value == 105u8 {
+    return 13;
+  }
+  if index == 13 && value == 116u8 {
+    return 14;
+  }
+  if index == 14 && value == 34u8 {
+    return 15;
+  }
+  if value == 34u8 {
+    return 1;
+  }
   return 0;
 }
 

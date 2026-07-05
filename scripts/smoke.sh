@@ -76,6 +76,26 @@ set -e
 [ ! -s "$incomplete_frame_stdout" ] || fail "expected no stdout from incomplete-frame stdin smoke"
 [ ! -s "$incomplete_frame_stderr" ] || fail "expected no stderr from incomplete-frame stdin smoke"
 
+method_free_input="$tmp_dir/method-free-input"
+method_free_stdout="$tmp_dir/method-free-stdout"
+method_free_stderr="$tmp_dir/method-free-stderr"
+
+{
+  printf 'Content-Length: 2\r\n\r\n{}'
+  printf 'Content-Length: 2\r\n\r\n{}'
+  printf 'Content-Length: 2\r\n\r\n{}'
+} > "$method_free_input"
+
+printf '%s\n' "smoke.sh: running method-free framed stdin smoke"
+set +e
+"$binary" < "$method_free_input" > "$method_free_stdout" 2> "$method_free_stderr"
+method_free_status=$?
+set -e
+
+[ "$method_free_status" -eq 0 ] || fail "expected method-free framed smoke exit status 0, got $method_free_status"
+[ ! -s "$method_free_stdout" ] || fail "expected no stdout from method-free framed stdin smoke"
+[ ! -s "$method_free_stderr" ] || fail "expected no stderr from method-free framed stdin smoke"
+
 protocol_input="$tmp_dir/protocol-input"
 protocol_stdout="$tmp_dir/protocol-stdout"
 protocol_stderr="$tmp_dir/protocol-stderr"
