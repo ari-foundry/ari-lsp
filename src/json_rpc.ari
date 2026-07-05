@@ -137,8 +137,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
                 waiting_id_colon = request_id_value_wait_start.waiting_id_colon;
                 waiting_id_value = request_id_value_wait_start.waiting_id_value;
               } else {
-                waiting_id_colon = false;
-                id_key_match = next_id_key_match_index(value, 0);
+                let request_id_value_wait_fallback = fallback_smoke_request_id_value_wait(value);
+                waiting_id_colon = request_id_value_wait_fallback.waiting_id_colon;
+                id_key_match = request_id_value_wait_fallback.id_key_match;
               }
             }
           } else {
@@ -359,6 +360,11 @@ struct SmokeRequestIdValueScanFallback {
 struct SmokeRequestIdValueWaitStart {
   waiting_id_colon: bool,
   waiting_id_value: bool,
+}
+
+struct SmokeRequestIdValueWaitFallback {
+  waiting_id_colon: bool,
+  id_key_match: i64,
 }
 
 struct JsonRpcFrameProgress {
@@ -745,6 +751,13 @@ fn start_smoke_request_id_value_wait() -> SmokeRequestIdValueWaitStart {
   return SmokeRequestIdValueWaitStart {
     waiting_id_colon: false,
     waiting_id_value: true,
+  };
+}
+
+fn fallback_smoke_request_id_value_wait(value: u8) -> SmokeRequestIdValueWaitFallback {
+  return SmokeRequestIdValueWaitFallback {
+    waiting_id_colon: false,
+    id_key_match: next_id_key_match_index(value, 0),
   };
 }
 
