@@ -101,12 +101,15 @@ require_grep "SmokeProtocolState" src/json_rpc.ari
 require_grep "initial_smoke_protocol_state" src/json_rpc.ari
 require_grep "BodyEndSmokeFrameState" src/json_rpc.ari
 require_grep "apply_completed_smoke_frame_to_body_end_state" src/json_rpc.ari
+require_grep "BodyEndScanResetState" src/json_rpc.ari
+require_grep "initial_body_end_scan_reset_state" src/json_rpc.ari
 require_grep "apply_completed_smoke_frame_to_protocol_state" src/json_rpc.ari
 require_grep "frame_has_supported_smoke_request_id" src/json_rpc.ari
 require_grep "is_supported_smoke_request_id" src/json_rpc.ari
 require_grep "write_supported_smoke_request_id" src/json_rpc.ari
 require_grep "body_end_request_id.present" src/json_rpc.ari
 require_grep "body_end_frame_state.frame_progress" src/json_rpc.ari
+require_grep "body_end_scan_reset.header_scan" src/json_rpc.ari
 require_grep "body_remaining = parsed_frame_progress.body_remaining" src/json_rpc.ari
 require_grep "Content-Length: 53" src/json_rpc.ari
 require_grep "Content-Length: 38" src/json_rpc.ari

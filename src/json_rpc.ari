@@ -177,13 +177,14 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             let body_end_completed_progress = body_end_frame_state.frame_progress;
             body_remaining = body_end_completed_progress.body_remaining;
             complete_frame_count = body_end_completed_progress.complete_frame_count;
-            let frame_end_header_scan = initial_content_length_header_scan_state();
+            let body_end_scan_reset = initial_body_end_scan_reset_state();
+            let frame_end_header_scan = body_end_scan_reset.header_scan;
             content_length_match = frame_end_header_scan.content_length_match;
             reading_content_length = frame_end_header_scan.reading_content_length;
             saw_content_length_digit = frame_end_header_scan.saw_content_length_digit;
             pending_content_length = frame_end_header_scan.pending_content_length;
             header_end_match = frame_end_header_scan.header_end_match;
-            let next_frame_scan = initial_smoke_frame_scan_state();
+            let next_frame_scan = body_end_scan_reset.frame_scan;
             method_key_match = next_frame_scan.method_key_match;
             waiting_method_colon = next_frame_scan.waiting_method_colon;
             waiting_method_value = next_frame_scan.waiting_method_value;
@@ -330,6 +331,11 @@ struct SmokeProtocolState {
 struct BodyEndSmokeFrameState {
   protocol_state: SmokeProtocolState,
   frame_progress: JsonRpcFrameProgress,
+}
+
+struct BodyEndScanResetState {
+  header_scan: ContentLengthHeaderScanState,
+  frame_scan: SmokeFrameScanState,
 }
 
 fn next_id_key_match_index(value: u8, index: i64) -> i64 {
@@ -677,6 +683,13 @@ fn initial_content_length_header_scan_state() -> ContentLengthHeaderScanState {
     saw_content_length_digit: false,
     pending_content_length: 0,
     header_end_match: 0,
+  };
+}
+
+fn initial_body_end_scan_reset_state() -> BodyEndScanResetState {
+  return BodyEndScanResetState {
+    header_scan: initial_content_length_header_scan_state(),
+    frame_scan: initial_smoke_frame_scan_state(),
   };
 }
 
