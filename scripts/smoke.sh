@@ -57,6 +57,25 @@ set -e
 [ ! -s "$non_protocol_stdout" ] || fail "expected no stdout from non-protocol stdin smoke"
 [ ! -s "$non_protocol_stderr" ] || fail "expected no stderr from non-protocol stdin smoke"
 
+incomplete_frame_input="$tmp_dir/incomplete-frame-input"
+incomplete_frame_stdout="$tmp_dir/incomplete-frame-stdout"
+incomplete_frame_stderr="$tmp_dir/incomplete-frame-stderr"
+
+{
+  printf 'Content-Length: 58\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0"'
+} > "$incomplete_frame_input"
+
+printf '%s\n' "smoke.sh: running incomplete-frame stdin smoke"
+set +e
+"$binary" < "$incomplete_frame_input" > "$incomplete_frame_stdout" 2> "$incomplete_frame_stderr"
+incomplete_frame_status=$?
+set -e
+
+[ "$incomplete_frame_status" -eq 0 ] || fail "expected incomplete-frame smoke exit status 0, got $incomplete_frame_status"
+[ ! -s "$incomplete_frame_stdout" ] || fail "expected no stdout from incomplete-frame stdin smoke"
+[ ! -s "$incomplete_frame_stderr" ] || fail "expected no stderr from incomplete-frame stdin smoke"
+
 protocol_input="$tmp_dir/protocol-input"
 protocol_stdout="$tmp_dir/protocol-stdout"
 protocol_stderr="$tmp_dir/protocol-stderr"

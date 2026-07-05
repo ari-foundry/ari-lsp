@@ -14,8 +14,8 @@ move, replace, or copy the bundled `tools/lsp` implementation from
 - `src/main.ari` is intentionally minimal and routes through placeholder
   server, config, JSON-RPC, protocol, and transport modules. The JSON-RPC
   scaffold reads stdin until EOF, returns 0 on clean EOF, and has a
-  Content-Length-gated fixed local initialize/shutdown/exit smoke response
-  path.
+  Content-Length frame-count-gated fixed local initialize/shutdown/exit smoke
+  response path.
 - Local repository-shape validation exists through `scripts/check.sh`.
 - Local compiler-backed build and smoke wrappers exist through
   `scripts/build.sh` and `scripts/smoke.sh`.

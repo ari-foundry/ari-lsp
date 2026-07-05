@@ -6,18 +6,57 @@ pub fn run_stdio_loop() -> i64 {
 
 fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std::io::Stdout) -> i64 {
   var content_length_match = 0;
-  var content_length_header_count = 0;
+  var reading_content_length = false;
+  var saw_content_length_digit = false;
+  var pending_content_length = 0;
+  var header_end_match = 0;
+  var body_remaining = 0;
+  var complete_frame_count = 0;
   while true {
     match std::io::read_one<std::io::Stdin>(input) {
       std::io::ReadByteValue(value) => {
-        content_length_match = next_content_length_match_index(value, content_length_match);
-        if content_length_match == 14 {
-          content_length_header_count = content_length_header_count + 1;
-          content_length_match = 0;
+        if body_remaining > 0 {
+          body_remaining = body_remaining - 1;
+          if body_remaining == 0 {
+            complete_frame_count = complete_frame_count + 1;
+            content_length_match = 0;
+            reading_content_length = false;
+            saw_content_length_digit = false;
+            pending_content_length = 0;
+            header_end_match = 0;
+          }
+        } else if reading_content_length {
+          if is_ascii_digit(value) {
+            pending_content_length = pending_content_length * 10 + ascii_digit_value(value);
+            saw_content_length_digit = true;
+            header_end_match = 0;
+          } else {
+            header_end_match = next_header_end_match_index(value, header_end_match);
+            if header_end_match == 4 && saw_content_length_digit {
+              body_remaining = pending_content_length;
+              if body_remaining == 0 {
+                complete_frame_count = complete_frame_count + 1;
+              }
+              content_length_match = 0;
+              reading_content_length = false;
+              saw_content_length_digit = false;
+              pending_content_length = 0;
+              header_end_match = 0;
+            }
+          }
+        } else {
+          content_length_match = next_content_length_header_match_index(value, content_length_match);
+          if content_length_match == 15 {
+            reading_content_length = true;
+            saw_content_length_digit = false;
+            pending_content_length = 0;
+            header_end_match = 0;
+            content_length_match = 0;
+          }
         }
       }
       std::io::ReadByteEof => {
-        if content_length_header_count >= 3 {
+        if complete_frame_count >= 3 {
           let write_status = write_protocol_smoke_responses(output);
           if write_status != 0 {
             return write_status;
@@ -41,7 +80,7 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
   return 0;
 }
 
-fn next_content_length_match_index(value: u8, index: i64) -> i64 {
+fn next_content_length_header_match_index(value: u8, index: i64) -> i64 {
   if index == 0 && value == 67u8 {
     return 1;
   }
@@ -84,10 +123,40 @@ fn next_content_length_match_index(value: u8, index: i64) -> i64 {
   if index == 13 && value == 104u8 {
     return 14;
   }
+  if index == 14 && value == 58u8 {
+    return 15;
+  }
   if value == 67u8 {
     return 1;
   }
   return 0;
+}
+
+fn next_header_end_match_index(value: u8, index: i64) -> i64 {
+  if index == 0 && value == 13u8 {
+    return 1;
+  }
+  if index == 1 && value == 10u8 {
+    return 2;
+  }
+  if index == 2 && value == 13u8 {
+    return 3;
+  }
+  if index == 3 && value == 10u8 {
+    return 4;
+  }
+  if value == 13u8 {
+    return 1;
+  }
+  return 0;
+}
+
+fn is_ascii_digit(value: u8) -> bool {
+  return value >= 48u8 && value <= 57u8;
+}
+
+fn ascii_digit_value(value: u8) -> i64 {
+  return (value as i64) - 48;
 }
 
 fn write_protocol_smoke_responses(output: ref mut std::io::Stdout) -> i64 {
