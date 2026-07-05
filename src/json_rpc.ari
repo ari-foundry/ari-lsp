@@ -45,25 +45,24 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
         if body_remaining > 0 {
           if reading_method_value {
             if value == 34u8 {
-              let scanned_method_value = finalize_scanned_smoke_method_value(
+              let method_value_scan_finish = finish_smoke_method_value_scan(
                 initialize_value_match,
                 shutdown_value_match,
                 exit_value_match);
-              if scanned_method_value.saw_initialize_method {
+              if method_value_scan_finish.saw_initialize_method {
                 frame_saw_initialize_method = true;
               }
-              if scanned_method_value.saw_shutdown_method {
+              if method_value_scan_finish.saw_shutdown_method {
                 frame_saw_shutdown_method = true;
               }
-              if scanned_method_value.saw_exit_method {
+              if method_value_scan_finish.saw_exit_method {
                 frame_saw_exit_method = true;
               }
-              let method_value_scan_reset = reset_smoke_method_value_scan();
-              reading_method_value = method_value_scan_reset.reading_method_value;
-              method_key_match = method_value_scan_reset.method_key_match;
-              initialize_value_match = method_value_scan_reset.initialize_value_match;
-              shutdown_value_match = method_value_scan_reset.shutdown_value_match;
-              exit_value_match = method_value_scan_reset.exit_value_match;
+              reading_method_value = method_value_scan_finish.reading_method_value;
+              method_key_match = method_value_scan_finish.method_key_match;
+              initialize_value_match = method_value_scan_finish.initialize_value_match;
+              shutdown_value_match = method_value_scan_finish.shutdown_value_match;
+              exit_value_match = method_value_scan_finish.exit_value_match;
             } else {
               let method_value_scan_update = scan_smoke_method_value_byte(
                 value,
@@ -342,6 +341,17 @@ struct ScannedSmokeMethodValue {
 }
 
 struct SmokeMethodValueScanReset {
+  reading_method_value: bool,
+  method_key_match: i64,
+  initialize_value_match: i64,
+  shutdown_value_match: i64,
+  exit_value_match: i64,
+}
+
+struct SmokeMethodValueScanFinish {
+  saw_initialize_method: bool,
+  saw_shutdown_method: bool,
+  saw_exit_method: bool,
   reading_method_value: bool,
   method_key_match: i64,
   initialize_value_match: i64,
@@ -769,6 +779,27 @@ fn reset_smoke_method_value_scan() -> SmokeMethodValueScanReset {
     initialize_value_match: 0,
     shutdown_value_match: 0,
     exit_value_match: 0,
+  };
+}
+
+fn finish_smoke_method_value_scan(
+  initialize_value_match: i64,
+  shutdown_value_match: i64,
+  exit_value_match: i64) -> SmokeMethodValueScanFinish {
+  let scanned_method_value = finalize_scanned_smoke_method_value(
+    initialize_value_match,
+    shutdown_value_match,
+    exit_value_match);
+  let method_value_scan_reset = reset_smoke_method_value_scan();
+  return SmokeMethodValueScanFinish {
+    saw_initialize_method: scanned_method_value.saw_initialize_method,
+    saw_shutdown_method: scanned_method_value.saw_shutdown_method,
+    saw_exit_method: scanned_method_value.saw_exit_method,
+    reading_method_value: method_value_scan_reset.reading_method_value,
+    method_key_match: method_value_scan_reset.method_key_match,
+    initialize_value_match: method_value_scan_reset.initialize_value_match,
+    shutdown_value_match: method_value_scan_reset.shutdown_value_match,
+    exit_value_match: method_value_scan_reset.exit_value_match,
   };
 }
 
