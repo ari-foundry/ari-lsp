@@ -119,6 +119,29 @@ set -e
 [ ! -s "$request_id_free_stdout" ] || fail "expected no stdout from request-id-free framed stdin smoke"
 [ ! -s "$request_id_free_stderr" ] || fail "expected no stderr from request-id-free framed stdin smoke"
 
+unsupported_id_input="$tmp_dir/unsupported-id-input"
+unsupported_id_stdout="$tmp_dir/unsupported-id-stdout"
+unsupported_id_stderr="$tmp_dir/unsupported-id-stderr"
+
+{
+  printf 'Content-Length: 63\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id" : 17,"method" : "initialize","params":{}}'
+  printf 'Content-Length: 49\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id" : 18,"method" : "shutdown"}'
+  printf 'Content-Length: 35\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","method" : "exit"}'
+} > "$unsupported_id_input"
+
+printf '%s\n' "smoke.sh: running unsupported-id framed stdin smoke"
+set +e
+"$binary" < "$unsupported_id_input" > "$unsupported_id_stdout" 2> "$unsupported_id_stderr"
+unsupported_id_status=$?
+set -e
+
+[ "$unsupported_id_status" -eq 0 ] || fail "expected unsupported-id framed smoke exit status 0, got $unsupported_id_status"
+[ ! -s "$unsupported_id_stdout" ] || fail "expected no stdout from unsupported-id framed stdin smoke"
+[ ! -s "$unsupported_id_stderr" ] || fail "expected no stderr from unsupported-id framed stdin smoke"
+
 protocol_input="$tmp_dir/protocol-input"
 protocol_stdout="$tmp_dir/protocol-stdout"
 protocol_stderr="$tmp_dir/protocol-stderr"
