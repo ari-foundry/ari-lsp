@@ -85,8 +85,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
           } else if waiting_method_colon {
             if !is_json_whitespace(value) {
               if value == 58u8 {
-                waiting_method_colon = false;
-                waiting_method_value = true;
+                let method_value_wait_start = start_smoke_method_value_wait();
+                waiting_method_colon = method_value_wait_start.waiting_method_colon;
+                waiting_method_value = method_value_wait_start.waiting_method_value;
               } else {
                 let method_value_wait_fallback = fallback_smoke_method_value_wait(value);
                 waiting_method_colon = method_value_wait_fallback.waiting_method_colon;
@@ -344,6 +345,11 @@ struct SmokeMethodValueScanReset {
 struct SmokeMethodColonWaitStart {
   waiting_method_colon: bool,
   method_key_match: i64,
+}
+
+struct SmokeMethodValueWaitStart {
+  waiting_method_colon: bool,
+  waiting_method_value: bool,
 }
 
 struct SmokeMethodValueWaitFallback {
@@ -744,6 +750,13 @@ fn start_smoke_method_colon_wait() -> SmokeMethodColonWaitStart {
   return SmokeMethodColonWaitStart {
     waiting_method_colon: true,
     method_key_match: 0,
+  };
+}
+
+fn start_smoke_method_value_wait() -> SmokeMethodValueWaitStart {
+  return SmokeMethodValueWaitStart {
+    waiting_method_colon: false,
+    waiting_method_value: true,
   };
 }
 
