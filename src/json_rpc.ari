@@ -96,9 +96,10 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               id_value = id_value * 10 + ascii_digit_value(value);
               saw_id_digit = true;
             } else {
-              if saw_id_digit {
+              let scanned_request_id = finalize_scanned_smoke_request_id(saw_id_digit, id_value);
+              if scanned_request_id.present {
                 frame_saw_request_id = true;
-                frame_request_id = id_value;
+                frame_request_id = scanned_request_id.value;
               }
               reading_id_value = false;
               id_value = 0;
@@ -138,8 +139,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
           body_remaining = body_remaining - 1;
           if body_remaining == 0 {
             if reading_id_value && saw_id_digit {
+              let frame_end_request_id = finalize_scanned_smoke_request_id(saw_id_digit, id_value);
               frame_saw_request_id = true;
-              frame_request_id = id_value;
+              frame_request_id = frame_end_request_id.value;
             }
             if frame_saw_initialize_method && frame_has_supported_smoke_request_id(frame_saw_request_id, frame_request_id) {
               saw_initialize_request = true;
@@ -230,6 +232,11 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
   }
 
   return 0;
+}
+
+struct ScannedSmokeRequestId {
+  present: bool,
+  value: i64,
 }
 
 fn next_id_key_match_index(value: u8, index: i64) -> i64 {
@@ -450,6 +457,10 @@ fn is_json_whitespace(value: u8) -> bool {
 
 fn ascii_digit_value(value: u8) -> i64 {
   return (value as i64) - 48;
+}
+
+fn finalize_scanned_smoke_request_id(saw_digit: bool, value: i64) -> ScannedSmokeRequestId {
+  return ScannedSmokeRequestId { present: saw_digit, value: value };
 }
 
 fn frame_has_supported_smoke_request_id(saw_request_id: bool, request_id: i64) -> bool {

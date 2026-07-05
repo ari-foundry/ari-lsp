@@ -83,6 +83,8 @@ require_grep "is_json_whitespace" src/json_rpc.ari
 require_grep "saw_initialize_request && saw_shutdown_request && saw_exit_notification" src/json_rpc.ari
 require_grep "initialize_request_id" src/json_rpc.ari
 require_grep "shutdown_request_id" src/json_rpc.ari
+require_grep "ScannedSmokeRequestId" src/json_rpc.ari
+require_grep "finalize_scanned_smoke_request_id" src/json_rpc.ari
 require_grep "frame_has_supported_smoke_request_id" src/json_rpc.ari
 require_grep "is_supported_smoke_request_id" src/json_rpc.ari
 require_grep "write_supported_smoke_request_id" src/json_rpc.ari
