@@ -8,10 +8,10 @@ A minimal JSON-RPC stdio loop scaffold exists in this repository. It reads
 stdin until EOF, flushes stdout at EOF, and returns 0 for clean EOF. Empty
 stdin, non-protocol stdin, incomplete framed stdin, and framed stdin without the
 smoke method fields and request ids emit no protocol messages. The local
-protocol smoke stream gets fixed initialize and shutdown responses after the
-scaffold observes three complete Content-Length-framed messages containing
-`method` string fields for `initialize`, `shutdown`, and `exit`, with simple
-numeric `id` fields for the initialize and shutdown smoke requests.
+protocol smoke stream gets fixed-result initialize and shutdown responses after
+the scaffold observes three complete Content-Length-framed messages containing
+`method` string fields for `initialize`, `shutdown`, and `exit`, with
+one-digit numeric `id` fields for the initialize and shutdown smoke requests.
 
 ## Current Status
 
@@ -23,12 +23,11 @@ numeric `id` fields for the initialize and shutdown smoke requests.
   declared body byte count.
 - For the local protocol smoke stream only, three complete framed messages
   containing literal `method` string fields for `initialize`, `shutdown`, and
-  `exit`, plus simple numeric `id` fields for the initialize and shutdown smoke
-  requests, produce a fixed initialize response and fixed shutdown response;
-  `exit` produces no response.
+  `exit`, plus one-digit numeric `id` fields for the initialize and shutdown
+  smoke requests, produce initialize and shutdown responses with fixed result
+  payloads and copied one-digit ids; `exit` produces no response.
 - No complete JSON-RPC framing or body parsing is implemented.
-- Response ids are fixed to the local smoke fixture. Dynamic request-id
-  propagation is not implemented.
+- General JSON-RPC request-id propagation is not implemented.
 - No general Language Server Protocol method dispatch is implemented.
 - Protocol compatibility is not claimed by this scaffold.
 

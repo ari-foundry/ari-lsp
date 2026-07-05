@@ -126,18 +126,18 @@ protocol_expected="$tmp_dir/protocol-expected"
 
 {
   printf 'Content-Length: 62\r\n\r\n'
-  printf '%s' '{"jsonrpc":"2.0","id" : 1,"method" : "initialize","params":{}}'
+  printf '%s' '{"jsonrpc":"2.0","id" : 7,"method" : "initialize","params":{}}'
   printf 'Content-Length: 48\r\n\r\n'
-  printf '%s' '{"jsonrpc":"2.0","id" : 2,"method" : "shutdown"}'
+  printf '%s' '{"jsonrpc":"2.0","id" : 8,"method" : "shutdown"}'
   printf 'Content-Length: 35\r\n\r\n'
   printf '%s' '{"jsonrpc":"2.0","method" : "exit"}'
 } > "$protocol_input"
 
 {
   printf 'Content-Length: 53\r\n\r\n'
-  printf '%s' '{"jsonrpc":"2.0","id":1,"result":{"capabilities":{}}}'
+  printf '%s' '{"jsonrpc":"2.0","id":7,"result":{"capabilities":{}}}'
   printf 'Content-Length: 38\r\n\r\n'
-  printf '%s' '{"jsonrpc":"2.0","id":2,"result":null}'
+  printf '%s' '{"jsonrpc":"2.0","id":8,"result":null}'
 } > "$protocol_expected"
 
 printf '%s\n' "smoke.sh: running protocol smoke"

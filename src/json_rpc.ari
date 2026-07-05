@@ -28,11 +28,13 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
   var frame_saw_initialize_method = false;
   var frame_saw_shutdown_method = false;
   var frame_saw_exit_method = false;
-  var frame_saw_id_one = false;
-  var frame_saw_id_two = false;
+  var frame_saw_request_id = false;
+  var frame_request_id = 0;
   var saw_initialize_request = false;
   var saw_shutdown_request = false;
   var saw_exit_notification = false;
+  var initialize_request_id = 0;
+  var shutdown_request_id = 0;
   while true {
     match std::io::read_one<std::io::Stdin>(input) {
       std::io::ReadByteValue(value) => {
@@ -95,12 +97,8 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               saw_id_digit = true;
             } else {
               if saw_id_digit {
-                if id_value == 1 {
-                  frame_saw_id_one = true;
-                }
-                if id_value == 2 {
-                  frame_saw_id_two = true;
-                }
+                frame_saw_request_id = true;
+                frame_request_id = id_value;
               }
               reading_id_value = false;
               id_value = 0;
@@ -140,18 +138,16 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
           body_remaining = body_remaining - 1;
           if body_remaining == 0 {
             if reading_id_value && saw_id_digit {
-              if id_value == 1 {
-                frame_saw_id_one = true;
-              }
-              if id_value == 2 {
-                frame_saw_id_two = true;
-              }
+              frame_saw_request_id = true;
+              frame_request_id = id_value;
             }
-            if frame_saw_initialize_method && frame_saw_id_one {
+            if frame_saw_initialize_method && frame_saw_request_id && is_smoke_response_id(frame_request_id) {
               saw_initialize_request = true;
+              initialize_request_id = frame_request_id;
             }
-            if frame_saw_shutdown_method && frame_saw_id_two {
+            if frame_saw_shutdown_method && frame_saw_request_id && is_smoke_response_id(frame_request_id) {
               saw_shutdown_request = true;
+              shutdown_request_id = frame_request_id;
             }
             if frame_saw_exit_method {
               saw_exit_notification = true;
@@ -178,8 +174,8 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             frame_saw_initialize_method = false;
             frame_saw_shutdown_method = false;
             frame_saw_exit_method = false;
-            frame_saw_id_one = false;
-            frame_saw_id_two = false;
+            frame_saw_request_id = false;
+            frame_request_id = 0;
           }
         } else if reading_content_length {
           if is_ascii_digit(value) {
@@ -213,7 +209,7 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
       }
       std::io::ReadByteEof => {
         if complete_frame_count >= 3 && saw_initialize_request && saw_shutdown_request && saw_exit_notification {
-          let write_status = write_protocol_smoke_responses(output);
+          let write_status = write_protocol_smoke_responses(output, initialize_request_id, shutdown_request_id);
           if write_status != 0 {
             return write_status;
           }
@@ -456,11 +452,106 @@ fn ascii_digit_value(value: u8) -> i64 {
   return (value as i64) - 48;
 }
 
-fn write_protocol_smoke_responses(output: ref mut std::io::Stdout) -> i64 {
-  let responses =
-    "Content-Length: 53\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{}}}Content-Length: 38\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":null}";
-  if std::io::write_all<std::io::Stdout>(output, responses).is_err() {
+fn is_smoke_response_id(value: i64) -> bool {
+  return value >= 0 && value <= 9;
+}
+
+fn write_protocol_smoke_responses(output: ref mut std::io::Stdout, initialize_id: i64, shutdown_id: i64) -> i64 {
+  if write_initialize_protocol_smoke_response(output, initialize_id) != 0 {
+    return 1;
+  }
+  if write_shutdown_protocol_smoke_response(output, shutdown_id) != 0 {
     return 1;
   }
   return 0;
+}
+
+fn write_initialize_protocol_smoke_response(output: ref mut std::io::Stdout, request_id: i64) -> i64 {
+  if std::io::write_all<std::io::Stdout>(output, "Content-Length: 53\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":").is_err() {
+    return 1;
+  }
+  if write_single_digit(output, request_id) != 0 {
+    return 1;
+  }
+  if std::io::write_all<std::io::Stdout>(output, ",\"result\":{\"capabilities\":{}}}").is_err() {
+    return 1;
+  }
+  return 0;
+}
+
+fn write_shutdown_protocol_smoke_response(output: ref mut std::io::Stdout, request_id: i64) -> i64 {
+  if std::io::write_all<std::io::Stdout>(output, "Content-Length: 38\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":").is_err() {
+    return 1;
+  }
+  if write_single_digit(output, request_id) != 0 {
+    return 1;
+  }
+  if std::io::write_all<std::io::Stdout>(output, ",\"result\":null}").is_err() {
+    return 1;
+  }
+  return 0;
+}
+
+fn write_single_digit(output: ref mut std::io::Stdout, value: i64) -> i64 {
+  if value == 0 {
+    if std::io::write_all<std::io::Stdout>(output, "0").is_err() {
+      return 1;
+    }
+    return 0;
+  }
+  if value == 1 {
+    if std::io::write_all<std::io::Stdout>(output, "1").is_err() {
+      return 1;
+    }
+    return 0;
+  }
+  if value == 2 {
+    if std::io::write_all<std::io::Stdout>(output, "2").is_err() {
+      return 1;
+    }
+    return 0;
+  }
+  if value == 3 {
+    if std::io::write_all<std::io::Stdout>(output, "3").is_err() {
+      return 1;
+    }
+    return 0;
+  }
+  if value == 4 {
+    if std::io::write_all<std::io::Stdout>(output, "4").is_err() {
+      return 1;
+    }
+    return 0;
+  }
+  if value == 5 {
+    if std::io::write_all<std::io::Stdout>(output, "5").is_err() {
+      return 1;
+    }
+    return 0;
+  }
+  if value == 6 {
+    if std::io::write_all<std::io::Stdout>(output, "6").is_err() {
+      return 1;
+    }
+    return 0;
+  }
+  if value == 7 {
+    if std::io::write_all<std::io::Stdout>(output, "7").is_err() {
+      return 1;
+    }
+    return 0;
+  }
+  if value == 8 {
+    if std::io::write_all<std::io::Stdout>(output, "8").is_err() {
+      return 1;
+    }
+    return 0;
+  }
+  if value == 9 {
+    if std::io::write_all<std::io::Stdout>(output, "9").is_err() {
+      return 1;
+    }
+    return 0;
+  }
+  return 1;
 }

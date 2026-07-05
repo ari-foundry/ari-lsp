@@ -81,6 +81,10 @@ require_grep "next_shutdown_method_value_match_index" src/json_rpc.ari
 require_grep "next_exit_method_value_match_index" src/json_rpc.ari
 require_grep "is_json_whitespace" src/json_rpc.ari
 require_grep "saw_initialize_request && saw_shutdown_request && saw_exit_notification" src/json_rpc.ari
+require_grep "initialize_request_id" src/json_rpc.ari
+require_grep "shutdown_request_id" src/json_rpc.ari
+require_grep "write_single_digit" src/json_rpc.ari
+require_grep "is_smoke_response_id" src/json_rpc.ari
 require_grep "body_remaining = pending_content_length" src/json_rpc.ari
 require_grep "Content-Length: 53" src/json_rpc.ari
 require_grep "Content-Length: 38" src/json_rpc.ari
@@ -108,8 +112,10 @@ require_grep "request-id-free framed stdin smoke" scripts/smoke.sh
 require_grep "protocol smoke" scripts/smoke.sh
 require_grep "Content-Length: 62" scripts/smoke.sh
 require_grep "Content-Length: 48" scripts/smoke.sh
-require_grep '"id" : 1' scripts/smoke.sh
-require_grep '"id" : 2' scripts/smoke.sh
+require_grep '"id" : 7' scripts/smoke.sh
+require_grep '"id" : 8' scripts/smoke.sh
+require_grep '"id":7' scripts/smoke.sh
+require_grep '"id":8' scripts/smoke.sh
 require_grep '"method" : "initialize"' scripts/smoke.sh
 require_grep '"method" : "shutdown"' scripts/smoke.sh
 require_grep '"method" : "exit"' scripts/smoke.sh
