@@ -233,14 +233,20 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             }
           }
         } else {
-          content_length_match = next_content_length_header_match_index(value, content_length_match);
-          if content_length_match == 15 {
-            reading_content_length = true;
-            saw_content_length_digit = false;
-            pending_content_length = 0;
-            header_end_match = 0;
-            content_length_match = 0;
-          }
+          let scanned_header_start = scan_content_length_header_start(
+            value,
+            ContentLengthHeaderScanState {
+              content_length_match: content_length_match,
+              reading_content_length: reading_content_length,
+              saw_content_length_digit: saw_content_length_digit,
+              pending_content_length: pending_content_length,
+              header_end_match: header_end_match,
+            });
+          content_length_match = scanned_header_start.content_length_match;
+          reading_content_length = scanned_header_start.reading_content_length;
+          saw_content_length_digit = scanned_header_start.saw_content_length_digit;
+          pending_content_length = scanned_header_start.pending_content_length;
+          header_end_match = scanned_header_start.header_end_match;
         }
       }
       std::io::ReadByteEof => {
@@ -544,6 +550,26 @@ fn next_header_end_match_index(value: u8, index: i64) -> i64 {
     return 1;
   }
   return 0;
+}
+
+fn scan_content_length_header_start(value: u8, scan: ContentLengthHeaderScanState) -> ContentLengthHeaderScanState {
+  let next_match = next_content_length_header_match_index(value, scan.content_length_match);
+  if next_match == 15 {
+    return ContentLengthHeaderScanState {
+      content_length_match: 0,
+      reading_content_length: true,
+      saw_content_length_digit: false,
+      pending_content_length: 0,
+      header_end_match: 0,
+    };
+  }
+  return ContentLengthHeaderScanState {
+    content_length_match: next_match,
+    reading_content_length: scan.reading_content_length,
+    saw_content_length_digit: scan.saw_content_length_digit,
+    pending_content_length: scan.pending_content_length,
+    header_end_match: scan.header_end_match,
+  };
 }
 
 fn is_ascii_digit(value: u8) -> bool {
