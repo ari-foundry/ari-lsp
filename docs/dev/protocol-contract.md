@@ -7,10 +7,10 @@ This document records the protocol boundary for the initial split workspace.
 A minimal JSON-RPC stdio loop scaffold exists in this repository. It reads
 stdin until EOF, flushes stdout at EOF, and returns 0 for clean EOF. Empty
 stdin, non-protocol stdin, incomplete framed stdin, and framed stdin without the
-smoke method tokens emit no protocol messages. The local protocol smoke stream
+smoke method fields emit no protocol messages. The local protocol smoke stream
 gets fixed initialize and shutdown responses after the scaffold observes three
-complete Content-Length-framed messages containing the `initialize`, `shutdown`,
-and `exit` method tokens.
+complete Content-Length-framed messages containing `method` string fields for
+`initialize`, `shutdown`, and `exit`.
 
 ## Current Status
 
@@ -21,9 +21,9 @@ and `exit` method tokens.
   decimal length digits, detects the header/body separator, and consumes the
   declared body byte count.
 - For the local protocol smoke stream only, three complete framed messages
-  containing literal `"method":"initialize"`, `"method":"shutdown"`, and
-  `"method":"exit"` tokens produce a fixed initialize response and fixed
-  shutdown response; `exit` produces no response.
+  containing literal `method` string fields for `initialize`, `shutdown`, and
+  `exit` produce a fixed initialize response and fixed shutdown response;
+  `exit` produces no response.
 - No complete JSON-RPC framing or body parsing is implemented.
 - No general Language Server Protocol method dispatch is implemented.
 - Protocol compatibility is not claimed by this scaffold.
