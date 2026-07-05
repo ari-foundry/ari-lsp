@@ -45,13 +45,17 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
         if body_remaining > 0 {
           if reading_method_value {
             if value == 34u8 {
-              if initialize_value_match == 10 {
+              let scanned_method_value = finalize_scanned_smoke_method_value(
+                initialize_value_match,
+                shutdown_value_match,
+                exit_value_match);
+              if scanned_method_value.saw_initialize_method {
                 frame_saw_initialize_method = true;
               }
-              if shutdown_value_match == 8 {
+              if scanned_method_value.saw_shutdown_method {
                 frame_saw_shutdown_method = true;
               }
-              if exit_value_match == 4 {
+              if scanned_method_value.saw_exit_method {
                 frame_saw_exit_method = true;
               }
               reading_method_value = false;
@@ -312,6 +316,12 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
 struct ScannedSmokeRequestId {
   present: bool,
   value: i64,
+}
+
+struct ScannedSmokeMethodValue {
+  saw_initialize_method: bool,
+  saw_shutdown_method: bool,
+  saw_exit_method: bool,
 }
 
 struct JsonRpcFrameProgress {
@@ -646,6 +656,17 @@ fn scan_content_length_header_end(value: u8, scan: ContentLengthHeaderScanState)
 
 fn finalize_scanned_smoke_request_id(saw_digit: bool, value: i64) -> ScannedSmokeRequestId {
   return ScannedSmokeRequestId { present: saw_digit, value: value };
+}
+
+fn finalize_scanned_smoke_method_value(
+  initialize_value_match: i64,
+  shutdown_value_match: i64,
+  exit_value_match: i64) -> ScannedSmokeMethodValue {
+  return ScannedSmokeMethodValue {
+    saw_initialize_method: initialize_value_match == 10,
+    saw_shutdown_method: shutdown_value_match == 8,
+    saw_exit_method: exit_value_match == 4,
+  };
 }
 
 fn finalize_body_end_smoke_request_id(
