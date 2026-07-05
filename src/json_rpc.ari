@@ -143,15 +143,21 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               frame_saw_request_id = true;
               frame_request_id = frame_end_request_id.value;
             }
-            if frame_saw_initialize_method && frame_has_supported_smoke_request_id(frame_saw_request_id, frame_request_id) {
+            let completed_frame = complete_smoke_frame(
+              frame_saw_initialize_method,
+              frame_saw_shutdown_method,
+              frame_saw_exit_method,
+              frame_saw_request_id,
+              frame_request_id);
+            if completed_frame.saw_initialize_request {
               saw_initialize_request = true;
-              initialize_request_id = frame_request_id;
+              initialize_request_id = completed_frame.initialize_request_id;
             }
-            if frame_saw_shutdown_method && frame_has_supported_smoke_request_id(frame_saw_request_id, frame_request_id) {
+            if completed_frame.saw_shutdown_request {
               saw_shutdown_request = true;
-              shutdown_request_id = frame_request_id;
+              shutdown_request_id = completed_frame.shutdown_request_id;
             }
-            if frame_saw_exit_method {
+            if completed_frame.saw_exit_notification {
               saw_exit_notification = true;
             }
             complete_frame_count = complete_frame_count + 1;
@@ -237,6 +243,14 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
 struct ScannedSmokeRequestId {
   present: bool,
   value: i64,
+}
+
+struct CompletedSmokeFrame {
+  saw_initialize_request: bool,
+  initialize_request_id: i64,
+  saw_shutdown_request: bool,
+  shutdown_request_id: i64,
+  saw_exit_notification: bool,
 }
 
 fn next_id_key_match_index(value: u8, index: i64) -> i64 {
@@ -461,6 +475,33 @@ fn ascii_digit_value(value: u8) -> i64 {
 
 fn finalize_scanned_smoke_request_id(saw_digit: bool, value: i64) -> ScannedSmokeRequestId {
   return ScannedSmokeRequestId { present: saw_digit, value: value };
+}
+
+fn complete_smoke_frame(
+  frame_saw_initialize_method: bool,
+  frame_saw_shutdown_method: bool,
+  frame_saw_exit_method: bool,
+  frame_saw_request_id: bool,
+  frame_request_id: i64) -> CompletedSmokeFrame {
+  var saw_initialize_request = false;
+  var initialize_request_id = 0;
+  var saw_shutdown_request = false;
+  var shutdown_request_id = 0;
+  if frame_saw_initialize_method && frame_has_supported_smoke_request_id(frame_saw_request_id, frame_request_id) {
+    saw_initialize_request = true;
+    initialize_request_id = frame_request_id;
+  }
+  if frame_saw_shutdown_method && frame_has_supported_smoke_request_id(frame_saw_request_id, frame_request_id) {
+    saw_shutdown_request = true;
+    shutdown_request_id = frame_request_id;
+  }
+  return CompletedSmokeFrame {
+    saw_initialize_request: saw_initialize_request,
+    initialize_request_id: initialize_request_id,
+    saw_shutdown_request: saw_shutdown_request,
+    shutdown_request_id: shutdown_request_id,
+    saw_exit_notification: frame_saw_exit_method,
+  };
 }
 
 fn frame_has_supported_smoke_request_id(saw_request_id: bool, request_id: i64) -> bool {
