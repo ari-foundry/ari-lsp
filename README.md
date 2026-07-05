@@ -72,8 +72,8 @@ download or build the Ari compiler.
 0 with no stdout or stderr. It also checks that non-protocol stdin, an
 incomplete framed message, and complete frames without the smoke method fields
 or supported request ids stay quiet. It also checks that unsupported multi-digit
-request ids stay quiet. It then sends a minimal initialize/shutdown/exit
-JSON-RPC stream and checks the current fixed initialize and shutdown result
-payloads with copied one-digit request ids. This checks only the current
-placeholder entrypoint and Content-Length frame-count plus method/id-field
-gated JSON-RPC stdio smoke scaffold.
+and string request ids stay quiet. It then sends a minimal
+initialize/shutdown/exit JSON-RPC stream and checks the current fixed initialize
+and shutdown result payloads with copied one-digit request ids. This checks
+only the current placeholder entrypoint and Content-Length frame-count plus
+method/id-field gated JSON-RPC stdio smoke scaffold.
