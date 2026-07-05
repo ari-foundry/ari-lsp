@@ -58,11 +58,12 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               if scanned_method_value.saw_exit_method {
                 frame_saw_exit_method = true;
               }
-              reading_method_value = false;
-              method_key_match = 0;
-              initialize_value_match = 0;
-              shutdown_value_match = 0;
-              exit_value_match = 0;
+              let method_value_scan_reset = reset_smoke_method_value_scan();
+              reading_method_value = method_value_scan_reset.reading_method_value;
+              method_key_match = method_value_scan_reset.method_key_match;
+              initialize_value_match = method_value_scan_reset.initialize_value_match;
+              shutdown_value_match = method_value_scan_reset.shutdown_value_match;
+              exit_value_match = method_value_scan_reset.exit_value_match;
             } else {
               initialize_value_match = next_initialize_method_value_match_index(value, initialize_value_match);
               shutdown_value_match = next_shutdown_method_value_match_index(value, shutdown_value_match);
@@ -322,6 +323,14 @@ struct ScannedSmokeMethodValue {
   saw_initialize_method: bool,
   saw_shutdown_method: bool,
   saw_exit_method: bool,
+}
+
+struct SmokeMethodValueScanReset {
+  reading_method_value: bool,
+  method_key_match: i64,
+  initialize_value_match: i64,
+  shutdown_value_match: i64,
+  exit_value_match: i64,
 }
 
 struct JsonRpcFrameProgress {
@@ -666,6 +675,16 @@ fn finalize_scanned_smoke_method_value(
     saw_initialize_method: initialize_value_match == 10,
     saw_shutdown_method: shutdown_value_match == 8,
     saw_exit_method: exit_value_match == 4,
+  };
+}
+
+fn reset_smoke_method_value_scan() -> SmokeMethodValueScanReset {
+  return SmokeMethodValueScanReset {
+    reading_method_value: false,
+    method_key_match: 0,
+    initialize_value_match: 0,
+    shutdown_value_match: 0,
+    exit_value_match: 0,
   };
 }
 
