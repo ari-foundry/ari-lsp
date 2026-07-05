@@ -142,17 +142,18 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
 
           body_remaining = body_remaining - 1;
           if body_remaining == 0 {
-            if reading_id_value && saw_id_digit {
-              let frame_end_request_id = finalize_scanned_smoke_request_id(saw_id_digit, id_value);
-              frame_saw_request_id = true;
-              frame_request_id = frame_end_request_id.value;
-            }
+            let body_end_request_id = finalize_body_end_smoke_request_id(
+              frame_saw_request_id,
+              frame_request_id,
+              reading_id_value,
+              saw_id_digit,
+              id_value);
             let completed_frame = complete_smoke_frame(
               frame_saw_initialize_method,
               frame_saw_shutdown_method,
               frame_saw_exit_method,
-              frame_saw_request_id,
-              frame_request_id);
+              body_end_request_id.present,
+              body_end_request_id.value);
             let current_protocol_state = SmokeProtocolState {
               saw_initialize_request: saw_initialize_request,
               saw_shutdown_request: saw_shutdown_request,
@@ -545,6 +546,21 @@ fn ascii_digit_value(value: u8) -> i64 {
 
 fn finalize_scanned_smoke_request_id(saw_digit: bool, value: i64) -> ScannedSmokeRequestId {
   return ScannedSmokeRequestId { present: saw_digit, value: value };
+}
+
+fn finalize_body_end_smoke_request_id(
+  frame_saw_request_id: bool,
+  frame_request_id: i64,
+  reading_id_value: bool,
+  saw_id_digit: bool,
+  id_value: i64) -> ScannedSmokeRequestId {
+  if reading_id_value && saw_id_digit {
+    return finalize_scanned_smoke_request_id(saw_id_digit, id_value);
+  }
+  return ScannedSmokeRequestId {
+    present: frame_saw_request_id,
+    value: frame_request_id,
+  };
 }
 
 fn initial_json_rpc_frame_progress() -> JsonRpcFrameProgress {
