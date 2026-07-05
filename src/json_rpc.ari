@@ -152,17 +152,19 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               frame_saw_exit_method,
               frame_saw_request_id,
               frame_request_id);
-            if completed_frame.saw_initialize_request {
-              saw_initialize_request = true;
-              initialize_request_id = completed_frame.initialize_request_id;
-            }
-            if completed_frame.saw_shutdown_request {
-              saw_shutdown_request = true;
-              shutdown_request_id = completed_frame.shutdown_request_id;
-            }
-            if completed_frame.saw_exit_notification {
-              saw_exit_notification = true;
-            }
+            let current_protocol_state = SmokeProtocolState {
+              saw_initialize_request: saw_initialize_request,
+              saw_shutdown_request: saw_shutdown_request,
+              saw_exit_notification: saw_exit_notification,
+              initialize_request_id: initialize_request_id,
+              shutdown_request_id: shutdown_request_id,
+            };
+            let applied_protocol_state = apply_completed_smoke_frame_to_protocol_state(current_protocol_state, completed_frame);
+            saw_initialize_request = applied_protocol_state.saw_initialize_request;
+            saw_shutdown_request = applied_protocol_state.saw_shutdown_request;
+            saw_exit_notification = applied_protocol_state.saw_exit_notification;
+            initialize_request_id = applied_protocol_state.initialize_request_id;
+            shutdown_request_id = applied_protocol_state.shutdown_request_id;
             complete_frame_count = complete_frame_count + 1;
             let frame_end_header_scan = initial_content_length_header_scan_state();
             content_length_match = frame_end_header_scan.content_length_match;
@@ -587,6 +589,34 @@ fn initial_smoke_protocol_state() -> SmokeProtocolState {
     saw_exit_notification: false,
     initialize_request_id: 0,
     shutdown_request_id: 0,
+  };
+}
+
+fn apply_completed_smoke_frame_to_protocol_state(
+  protocol_state: SmokeProtocolState,
+  completed_frame: CompletedSmokeFrame) -> SmokeProtocolState {
+  var saw_initialize_request = protocol_state.saw_initialize_request;
+  var saw_shutdown_request = protocol_state.saw_shutdown_request;
+  var saw_exit_notification = protocol_state.saw_exit_notification;
+  var initialize_request_id = protocol_state.initialize_request_id;
+  var shutdown_request_id = protocol_state.shutdown_request_id;
+  if completed_frame.saw_initialize_request {
+    saw_initialize_request = true;
+    initialize_request_id = completed_frame.initialize_request_id;
+  }
+  if completed_frame.saw_shutdown_request {
+    saw_shutdown_request = true;
+    shutdown_request_id = completed_frame.shutdown_request_id;
+  }
+  if completed_frame.saw_exit_notification {
+    saw_exit_notification = true;
+  }
+  return SmokeProtocolState {
+    saw_initialize_request: saw_initialize_request,
+    saw_shutdown_request: saw_shutdown_request,
+    saw_exit_notification: saw_exit_notification,
+    initialize_request_id: initialize_request_id,
+    shutdown_request_id: shutdown_request_id,
   };
 }
 
