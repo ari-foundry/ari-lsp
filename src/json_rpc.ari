@@ -141,11 +141,11 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               frame_saw_request_id = true;
               frame_request_id = id_value;
             }
-            if frame_saw_initialize_method && frame_saw_request_id && is_smoke_response_id(frame_request_id) {
+            if frame_saw_initialize_method && frame_has_supported_smoke_request_id(frame_saw_request_id, frame_request_id) {
               saw_initialize_request = true;
               initialize_request_id = frame_request_id;
             }
-            if frame_saw_shutdown_method && frame_saw_request_id && is_smoke_response_id(frame_request_id) {
+            if frame_saw_shutdown_method && frame_has_supported_smoke_request_id(frame_saw_request_id, frame_request_id) {
               saw_shutdown_request = true;
               shutdown_request_id = frame_request_id;
             }
@@ -452,7 +452,11 @@ fn ascii_digit_value(value: u8) -> i64 {
   return (value as i64) - 48;
 }
 
-fn is_smoke_response_id(value: i64) -> bool {
+fn frame_has_supported_smoke_request_id(saw_request_id: bool, request_id: i64) -> bool {
+  return saw_request_id && is_supported_smoke_request_id(request_id);
+}
+
+fn is_supported_smoke_request_id(value: i64) -> bool {
   return value >= 0 && value <= 9;
 }
 
@@ -470,7 +474,7 @@ fn write_initialize_protocol_smoke_response(output: ref mut std::io::Stdout, req
   if std::io::write_all<std::io::Stdout>(output, "Content-Length: 53\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":").is_err() {
     return 1;
   }
-  if write_single_digit(output, request_id) != 0 {
+  if write_supported_smoke_request_id(output, request_id) != 0 {
     return 1;
   }
   if std::io::write_all<std::io::Stdout>(output, ",\"result\":{\"capabilities\":{}}}").is_err() {
@@ -483,7 +487,7 @@ fn write_shutdown_protocol_smoke_response(output: ref mut std::io::Stdout, reque
   if std::io::write_all<std::io::Stdout>(output, "Content-Length: 38\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":").is_err() {
     return 1;
   }
-  if write_single_digit(output, request_id) != 0 {
+  if write_supported_smoke_request_id(output, request_id) != 0 {
     return 1;
   }
   if std::io::write_all<std::io::Stdout>(output, ",\"result\":null}").is_err() {
@@ -492,7 +496,7 @@ fn write_shutdown_protocol_smoke_response(output: ref mut std::io::Stdout, reque
   return 0;
 }
 
-fn write_single_digit(output: ref mut std::io::Stdout, value: i64) -> i64 {
+fn write_supported_smoke_request_id(output: ref mut std::io::Stdout, value: i64) -> i64 {
   if value == 0 {
     if std::io::write_all<std::io::Stdout>(output, "0").is_err() {
       return 1;
