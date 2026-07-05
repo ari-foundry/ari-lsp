@@ -4,7 +4,7 @@ mod protocol;
 mod transport;
 
 pub fn run_placeholder_entry() -> i64 {
-  let json_rpc_status = json_rpc::initial_json_rpc_status();
+  let json_rpc_status = json_rpc::run_stdio_loop();
   if json_rpc_status != 0 {
     return json_rpc_status;
   }

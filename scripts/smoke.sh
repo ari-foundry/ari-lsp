@@ -33,7 +33,7 @@ stderr_file="$tmp_dir/stderr"
 
 printf '%s\n' "smoke.sh: running $binary"
 set +e
-"$binary" > "$stdout_file" 2> "$stderr_file"
+"$binary" < /dev/null > "$stdout_file" 2> "$stderr_file"
 status=$?
 set -e
 
