@@ -6,19 +6,22 @@ This document records the protocol boundary for the initial split workspace.
 
 A minimal JSON-RPC stdio loop scaffold exists in this repository. It reads
 stdin until EOF, flushes stdout at EOF, and returns 0 for clean EOF. Empty
-stdin and non-protocol stdin emit no protocol messages; the local protocol
-smoke stream gets fixed initialize and shutdown responses after the scaffold
-observes the expected Content-Length headers.
+stdin, non-protocol stdin, and incomplete framed stdin emit no protocol
+messages; the local protocol smoke stream gets fixed initialize and shutdown
+responses after the scaffold observes three complete Content-Length-framed
+messages.
 
 ## Current Status
 
 - `src/main.ari` routes through placeholder server, config, JSON-RPC,
   protocol, and transport modules.
 - The JSON-RPC loop currently reads stdin byte-by-byte until EOF and flushes
-  stdout. While reading, it counts `Content-Length` header markers.
-- For the local protocol smoke stream only, three observed Content-Length
-  headers produce a fixed initialize response and fixed shutdown response;
-  `exit` produces no response.
+  stdout. While reading, it scans `Content-Length:` header prefixes, parses
+  decimal length digits, detects the header/body separator, and consumes the
+  declared body byte count.
+- For the local protocol smoke stream only, three complete framed messages
+  produce a fixed initialize response and fixed shutdown response; `exit`
+  produces no response.
 - No complete JSON-RPC framing or body parsing is implemented.
 - No general Language Server Protocol method dispatch is implemented.
 - Protocol compatibility is not claimed by this scaffold.
