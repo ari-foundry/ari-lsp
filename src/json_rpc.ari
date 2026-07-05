@@ -140,7 +140,12 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             }
           }
 
-          body_remaining = body_remaining - 1;
+          let consumed_body_progress = consume_json_rpc_body_byte(JsonRpcFrameProgress {
+            body_remaining: body_remaining,
+            complete_frame_count: complete_frame_count,
+          });
+          body_remaining = consumed_body_progress.body_remaining;
+          complete_frame_count = consumed_body_progress.complete_frame_count;
           if body_remaining == 0 {
             let body_end_request_id = finalize_body_end_smoke_request_id(
               frame_saw_request_id,
@@ -669,6 +674,13 @@ fn complete_json_rpc_frame(progress: JsonRpcFrameProgress) -> JsonRpcFrameProgre
   return JsonRpcFrameProgress {
     body_remaining: 0,
     complete_frame_count: progress.complete_frame_count + 1,
+  };
+}
+
+fn consume_json_rpc_body_byte(progress: JsonRpcFrameProgress) -> JsonRpcFrameProgress {
+  return JsonRpcFrameProgress {
+    body_remaining: progress.body_remaining - 1,
+    complete_frame_count: progress.complete_frame_count,
   };
 }
 

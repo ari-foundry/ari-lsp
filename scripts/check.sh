@@ -91,6 +91,7 @@ require_grep "finalize_scanned_smoke_request_id" src/json_rpc.ari
 require_grep "finalize_body_end_smoke_request_id" src/json_rpc.ari
 require_grep "JsonRpcFrameProgress" src/json_rpc.ari
 require_grep "complete_json_rpc_frame" src/json_rpc.ari
+require_grep "consume_json_rpc_body_byte" src/json_rpc.ari
 require_grep "ContentLengthParseResult" src/json_rpc.ari
 require_grep "finalize_content_length_parse" src/json_rpc.ari
 require_grep "apply_content_length_parse_to_frame_progress" src/json_rpc.ari
@@ -120,6 +121,7 @@ require_grep "pending_content_length = digit_header_scan.pending_content_length"
 require_grep "header_end_match = header_end_scan.header_end_match" src/json_rpc.ari
 require_grep "parsed_header_state.header_scan" src/json_rpc.ari
 require_grep "parsed_header_state.frame_progress" src/json_rpc.ari
+require_grep "body_remaining = consumed_body_progress.body_remaining" src/json_rpc.ari
 require_grep "body_remaining = parsed_frame_progress.body_remaining" src/json_rpc.ari
 require_grep "Content-Length: 53" src/json_rpc.ari
 require_grep "Content-Length: 38" src/json_rpc.ari
