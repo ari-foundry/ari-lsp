@@ -1,0 +1,3 @@
+pub fn initial_protocol_status() -> i64 {
+  return 0;
+}

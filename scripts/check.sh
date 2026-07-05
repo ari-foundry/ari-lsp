@@ -36,6 +36,11 @@ require_file scripts/check.sh
 require_file scripts/build.sh
 require_file scripts/smoke.sh
 require_file src/main.ari
+require_file src/server.ari
+require_file src/config.ari
+require_file src/json_rpc.ari
+require_file src/protocol.ari
+require_file src/transport.ari
 require_file .github/workflows/check.yml
 
 require_dir docs/dev
@@ -57,7 +62,13 @@ if grep -R -q -- "Metadata entry:" src; then
 fi
 
 require_grep "fn main() -> i64" src/main.ari
-require_grep "return 0;" src/main.ari
+require_grep "mod server;" src/main.ari
+require_grep "return server::run_placeholder_entry();" src/main.ari
+require_grep "pub fn run_placeholder_entry() -> i64" src/server.ari
+require_grep "pub fn default_exit_code() -> i64" src/config.ari
+require_grep "pub fn initial_json_rpc_status() -> i64" src/json_rpc.ari
+require_grep "pub fn initial_protocol_status() -> i64" src/protocol.ari
+require_grep "pub fn initial_transport_status() -> i64" src/transport.ari
 require_no_grep "JSON-RPC" src/main.ari
 require_no_grep "Language Server Protocol" src/main.ari
 

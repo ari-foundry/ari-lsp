@@ -1,0 +1,23 @@
+mod config;
+mod json_rpc;
+mod protocol;
+mod transport;
+
+pub fn run_placeholder_entry() -> i64 {
+  let json_rpc_status = json_rpc::initial_json_rpc_status();
+  if json_rpc_status != 0 {
+    return json_rpc_status;
+  }
+
+  let protocol_status = protocol::initial_protocol_status();
+  if protocol_status != 0 {
+    return protocol_status;
+  }
+
+  let transport_status = transport::initial_transport_status();
+  if transport_status != 0 {
+    return transport_status;
+  }
+
+  return config::default_exit_code();
+}

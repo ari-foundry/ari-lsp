@@ -8,7 +8,9 @@ No JSON-RPC implementation exists in this repository yet.
 
 ## Current Status
 
-- `src/main.ari` returns 0 and does not read stdin or write stdout/stderr.
+- `src/main.ari` routes through placeholder server, config, JSON-RPC,
+  protocol, and transport modules that return 0 and do not read stdin or write
+  stdout/stderr.
 - No JSON-RPC framing is implemented.
 - No Language Server Protocol methods are implemented.
 - Protocol compatibility is not claimed by this scaffold.

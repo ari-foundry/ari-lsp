@@ -1,3 +1,5 @@
+mod server;
+
 fn main() -> i64 {
-  return 0;
+  return server::run_placeholder_entry();
 }
