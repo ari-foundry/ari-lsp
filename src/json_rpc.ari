@@ -193,7 +193,7 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
                 complete_frame_count: complete_frame_count,
               },
               completed_frame);
-            let applied_protocol_state = body_end_frame_state.protocol_state;
+            let applied_protocol_state = apply_body_end_protocol_state(body_end_frame_state);
             saw_initialize_request = applied_protocol_state.saw_initialize_request;
             saw_shutdown_request = applied_protocol_state.saw_shutdown_request;
             saw_exit_notification = applied_protocol_state.saw_exit_notification;
@@ -1003,6 +1003,10 @@ fn apply_completed_smoke_frame_to_body_end_state(
     protocol_state: apply_completed_smoke_frame_to_protocol_state(protocol_state, completed_frame),
     frame_progress: complete_json_rpc_frame(frame_progress),
   };
+}
+
+fn apply_body_end_protocol_state(body_end_frame_state: BodyEndSmokeFrameState) -> SmokeProtocolState {
+  return body_end_frame_state.protocol_state;
 }
 
 fn finalize_content_length_parse(saw_digit: bool, length: i64, header_end_match: i64) -> ContentLengthParseResult {
