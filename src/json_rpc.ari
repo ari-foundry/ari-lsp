@@ -210,17 +210,15 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               saw_content_length_digit,
               pending_content_length,
               header_end_match);
+            let parsed_frame_progress = apply_content_length_parse_to_frame_progress(
+              parsed_content_length,
+              JsonRpcFrameProgress {
+                body_remaining: body_remaining,
+                complete_frame_count: complete_frame_count,
+              });
+            body_remaining = parsed_frame_progress.body_remaining;
+            complete_frame_count = parsed_frame_progress.complete_frame_count;
             if parsed_content_length.present {
-              body_remaining = parsed_content_length.length;
-              if body_remaining == 0 {
-                let zero_length_frame_progress = JsonRpcFrameProgress {
-                  body_remaining: body_remaining,
-                  complete_frame_count: complete_frame_count,
-                };
-                let zero_length_completed_progress = complete_json_rpc_frame(zero_length_frame_progress);
-                body_remaining = zero_length_completed_progress.body_remaining;
-                complete_frame_count = zero_length_completed_progress.complete_frame_count;
-              }
               let header_end_header_scan = initial_content_length_header_scan_state();
               content_length_match = header_end_header_scan.content_length_match;
               reading_content_length = header_end_header_scan.reading_content_length;
@@ -567,6 +565,24 @@ fn finalize_content_length_parse(saw_digit: bool, length: i64, header_end_match:
   return ContentLengthParseResult {
     present: saw_digit && header_end_match == 4,
     length: length,
+  };
+}
+
+fn apply_content_length_parse_to_frame_progress(
+  parsed_content_length: ContentLengthParseResult,
+  progress: JsonRpcFrameProgress) -> JsonRpcFrameProgress {
+  if !parsed_content_length.present {
+    return progress;
+  }
+  if parsed_content_length.length == 0 {
+    return complete_json_rpc_frame(JsonRpcFrameProgress {
+      body_remaining: 0,
+      complete_frame_count: progress.complete_frame_count,
+    });
+  }
+  return JsonRpcFrameProgress {
+    body_remaining: parsed_content_length.length,
+    complete_frame_count: progress.complete_frame_count,
   };
 }
 
