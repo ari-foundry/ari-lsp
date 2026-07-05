@@ -5,11 +5,12 @@ pub fn run_stdio_loop() -> i64 {
 }
 
 fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std::io::Stdout) -> i64 {
-  var content_length_match = 0;
-  var reading_content_length = false;
-  var saw_content_length_digit = false;
-  var pending_content_length = 0;
-  var header_end_match = 0;
+  let initial_header_scan = initial_content_length_header_scan_state();
+  var content_length_match = initial_header_scan.content_length_match;
+  var reading_content_length = initial_header_scan.reading_content_length;
+  var saw_content_length_digit = initial_header_scan.saw_content_length_digit;
+  var pending_content_length = initial_header_scan.pending_content_length;
+  var header_end_match = initial_header_scan.header_end_match;
   var body_remaining = 0;
   var complete_frame_count = 0;
   let initial_frame_scan = initial_smoke_frame_scan_state();
@@ -162,11 +163,12 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               saw_exit_notification = true;
             }
             complete_frame_count = complete_frame_count + 1;
-            content_length_match = 0;
-            reading_content_length = false;
-            saw_content_length_digit = false;
-            pending_content_length = 0;
-            header_end_match = 0;
+            let frame_end_header_scan = initial_content_length_header_scan_state();
+            content_length_match = frame_end_header_scan.content_length_match;
+            reading_content_length = frame_end_header_scan.reading_content_length;
+            saw_content_length_digit = frame_end_header_scan.saw_content_length_digit;
+            pending_content_length = frame_end_header_scan.pending_content_length;
+            header_end_match = frame_end_header_scan.header_end_match;
             let next_frame_scan = initial_smoke_frame_scan_state();
             method_key_match = next_frame_scan.method_key_match;
             waiting_method_colon = next_frame_scan.waiting_method_colon;
@@ -199,11 +201,12 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               if body_remaining == 0 {
                 complete_frame_count = complete_frame_count + 1;
               }
-              content_length_match = 0;
-              reading_content_length = false;
-              saw_content_length_digit = false;
-              pending_content_length = 0;
-              header_end_match = 0;
+              let header_end_header_scan = initial_content_length_header_scan_state();
+              content_length_match = header_end_header_scan.content_length_match;
+              reading_content_length = header_end_header_scan.reading_content_length;
+              saw_content_length_digit = header_end_header_scan.saw_content_length_digit;
+              pending_content_length = header_end_header_scan.pending_content_length;
+              header_end_match = header_end_header_scan.header_end_match;
             }
           }
         } else {
@@ -274,6 +277,14 @@ struct SmokeFrameScanState {
   saw_exit_method: bool,
   saw_request_id: bool,
   request_id: i64,
+}
+
+struct ContentLengthHeaderScanState {
+  content_length_match: i64,
+  reading_content_length: bool,
+  saw_content_length_digit: bool,
+  pending_content_length: i64,
+  header_end_match: i64,
 }
 
 fn next_id_key_match_index(value: u8, index: i64) -> i64 {
@@ -547,6 +558,16 @@ fn initial_smoke_frame_scan_state() -> SmokeFrameScanState {
     saw_exit_method: false,
     saw_request_id: false,
     request_id: 0,
+  };
+}
+
+fn initial_content_length_header_scan_state() -> ContentLengthHeaderScanState {
+  return ContentLengthHeaderScanState {
+    content_length_match: 0,
+    reading_content_length: false,
+    saw_content_length_digit: false,
+    pending_content_length: 0,
+    header_end_match: 0,
   };
 }
 
