@@ -26,7 +26,8 @@ implementation work.
 
 - This repository is an initial standalone split scaffold.
 - Ari-language implementation source is limited to a minimal `src/main.ari`
-  entrypoint that returns 0.
+  entrypoint plus placeholder server, config, JSON-RPC, protocol, and transport
+  modules that return 0.
 - JSON-RPC and Language Server Protocol handling are not implemented here yet.
 - Local build and smoke scripts require an explicit Ari compiler path.
 - Compiler-free repository-shape validation is available through

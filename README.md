@@ -23,7 +23,7 @@ This repository currently owns:
 - dependency and protocol boundary notes
 - lightweight repository validation
 - local build and smoke wrappers
-- a minimal Ari entrypoint that returns 0
+- a minimal Ari entrypoint and source-level LSP module scaffold that returns 0
 
 The repository does not yet own a working language server implementation.
 
@@ -69,4 +69,4 @@ download or build the Ari compiler.
 
 `scripts/smoke.sh` delegates to `scripts/build.sh`, then runs the resulting
 `build/ari-lsp` executable and expects exit status 0 with no stdout or stderr.
-This checks only the current placeholder entrypoint.
+This checks only the current placeholder entrypoint and source module scaffold.

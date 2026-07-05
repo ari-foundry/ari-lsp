@@ -11,7 +11,8 @@ move, replace, or copy the bundled `tools/lsp` implementation from
 ## Current Status
 
 - This repository is an initial split scaffold.
-- `src/main.ari` is intentionally minimal and returns 0.
+- `src/main.ari` is intentionally minimal and routes through placeholder
+  server, config, JSON-RPC, protocol, and transport modules that return 0.
 - Local repository-shape validation exists through `scripts/check.sh`.
 - Local compiler-backed build and smoke wrappers exist through
   `scripts/build.sh` and `scripts/smoke.sh`.
@@ -40,6 +41,8 @@ Future pull requests should stay narrow. Good next steps include:
 - adding compiler-free tests for repository invariants
 - documenting migration decisions confirmed from `ari-foundry/ari`
 - adding build or smoke checks only when the Ari compiler path is explicit
+- adding a JSON-RPC stdio loop scaffold only after the source module boundary is
+  ready
 
 ## Non-Goals
 
