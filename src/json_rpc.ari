@@ -32,11 +32,12 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
   var frame_saw_exit_method = initial_frame_scan.saw_exit_method;
   var frame_saw_request_id = initial_frame_scan.saw_request_id;
   var frame_request_id = initial_frame_scan.request_id;
-  var saw_initialize_request = false;
-  var saw_shutdown_request = false;
-  var saw_exit_notification = false;
-  var initialize_request_id = 0;
-  var shutdown_request_id = 0;
+  let initial_protocol_state = initial_smoke_protocol_state();
+  var saw_initialize_request = initial_protocol_state.saw_initialize_request;
+  var saw_shutdown_request = initial_protocol_state.saw_shutdown_request;
+  var saw_exit_notification = initial_protocol_state.saw_exit_notification;
+  var initialize_request_id = initial_protocol_state.initialize_request_id;
+  var shutdown_request_id = initial_protocol_state.shutdown_request_id;
   while true {
     match std::io::read_one<std::io::Stdin>(input) {
       std::io::ReadByteValue(value) => {
@@ -285,6 +286,14 @@ struct ContentLengthHeaderScanState {
   saw_content_length_digit: bool,
   pending_content_length: i64,
   header_end_match: i64,
+}
+
+struct SmokeProtocolState {
+  saw_initialize_request: bool,
+  saw_shutdown_request: bool,
+  saw_exit_notification: bool,
+  initialize_request_id: i64,
+  shutdown_request_id: i64,
 }
 
 fn next_id_key_match_index(value: u8, index: i64) -> i64 {
@@ -568,6 +577,16 @@ fn initial_content_length_header_scan_state() -> ContentLengthHeaderScanState {
     saw_content_length_digit: false,
     pending_content_length: 0,
     header_end_match: 0,
+  };
+}
+
+fn initial_smoke_protocol_state() -> SmokeProtocolState {
+  return SmokeProtocolState {
+    saw_initialize_request: false,
+    saw_shutdown_request: false,
+    saw_exit_notification: false,
+    initialize_request_id: 0,
+    shutdown_request_id: 0,
   };
 }
 
