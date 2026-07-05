@@ -102,6 +102,8 @@ require_grep "SmokeRequestIdValueWaitStart" src/json_rpc.ari
 require_grep "start_smoke_request_id_value_wait" src/json_rpc.ari
 require_grep "SmokeRequestIdValueWaitFallback" src/json_rpc.ari
 require_grep "fallback_smoke_request_id_value_wait" src/json_rpc.ari
+require_grep "SmokeRequestIdColonWaitStart" src/json_rpc.ari
+require_grep "start_smoke_request_id_colon_wait" src/json_rpc.ari
 require_grep "finalize_body_end_smoke_request_id" src/json_rpc.ari
 require_grep "JsonRpcFrameProgress" src/json_rpc.ari
 require_grep "complete_json_rpc_frame" src/json_rpc.ari
@@ -142,6 +144,7 @@ require_grep "reading_id_value = request_id_value_scan_start.reading_id_value" s
 require_grep "id_key_match = request_id_value_scan_fallback.id_key_match" src/json_rpc.ari
 require_grep "waiting_id_value = request_id_value_wait_start.waiting_id_value" src/json_rpc.ari
 require_grep "id_key_match = request_id_value_wait_fallback.id_key_match" src/json_rpc.ari
+require_grep "waiting_id_colon = request_id_colon_wait_start.waiting_id_colon" src/json_rpc.ari
 require_grep "body_remaining = consumed_body_progress.body_remaining" src/json_rpc.ari
 require_grep "body_remaining = parsed_frame_progress.body_remaining" src/json_rpc.ari
 require_grep "Content-Length: 53" src/json_rpc.ari
