@@ -125,8 +125,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
                 id_value = request_id_value_scan_start.id_value;
                 saw_id_digit = request_id_value_scan_start.saw_id_digit;
               } else {
-                waiting_id_value = false;
-                id_key_match = next_id_key_match_index(value, 0);
+                let request_id_value_scan_fallback = fallback_smoke_request_id_value_scan(value);
+                waiting_id_value = request_id_value_scan_fallback.waiting_id_value;
+                id_key_match = request_id_value_scan_fallback.id_key_match;
               }
             }
           } else if waiting_id_colon {
@@ -347,6 +348,11 @@ struct SmokeRequestIdValueScanStart {
   reading_id_value: bool,
   id_value: i64,
   saw_id_digit: bool,
+}
+
+struct SmokeRequestIdValueScanFallback {
+  waiting_id_value: bool,
+  id_key_match: i64,
 }
 
 struct JsonRpcFrameProgress {
@@ -719,6 +725,13 @@ fn start_smoke_request_id_value_scan(value: u8) -> SmokeRequestIdValueScanStart 
     reading_id_value: true,
     id_value: ascii_digit_value(value),
     saw_id_digit: true,
+  };
+}
+
+fn fallback_smoke_request_id_value_scan(value: u8) -> SmokeRequestIdValueScanFallback {
+  return SmokeRequestIdValueScanFallback {
+    waiting_id_value: false,
+    id_key_match: next_id_key_match_index(value, 0),
   };
 }
 
