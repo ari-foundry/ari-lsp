@@ -96,16 +96,39 @@ set -e
 [ ! -s "$method_free_stdout" ] || fail "expected no stdout from method-free framed stdin smoke"
 [ ! -s "$method_free_stderr" ] || fail "expected no stderr from method-free framed stdin smoke"
 
+request_id_free_input="$tmp_dir/request-id-free-input"
+request_id_free_stdout="$tmp_dir/request-id-free-stdout"
+request_id_free_stderr="$tmp_dir/request-id-free-stderr"
+
+{
+  printf 'Content-Length: 53\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","method" : "initialize","params":{}}'
+  printf 'Content-Length: 39\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","method" : "shutdown"}'
+  printf 'Content-Length: 35\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","method" : "exit"}'
+} > "$request_id_free_input"
+
+printf '%s\n' "smoke.sh: running request-id-free framed stdin smoke"
+set +e
+"$binary" < "$request_id_free_input" > "$request_id_free_stdout" 2> "$request_id_free_stderr"
+request_id_free_status=$?
+set -e
+
+[ "$request_id_free_status" -eq 0 ] || fail "expected request-id-free framed smoke exit status 0, got $request_id_free_status"
+[ ! -s "$request_id_free_stdout" ] || fail "expected no stdout from request-id-free framed stdin smoke"
+[ ! -s "$request_id_free_stderr" ] || fail "expected no stderr from request-id-free framed stdin smoke"
+
 protocol_input="$tmp_dir/protocol-input"
 protocol_stdout="$tmp_dir/protocol-stdout"
 protocol_stderr="$tmp_dir/protocol-stderr"
 protocol_expected="$tmp_dir/protocol-expected"
 
 {
-  printf 'Content-Length: 60\r\n\r\n'
-  printf '%s' '{"jsonrpc":"2.0","id":1,"method" : "initialize","params":{}}'
-  printf 'Content-Length: 46\r\n\r\n'
-  printf '%s' '{"jsonrpc":"2.0","id":2,"method" : "shutdown"}'
+  printf 'Content-Length: 62\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id" : 1,"method" : "initialize","params":{}}'
+  printf 'Content-Length: 48\r\n\r\n'
+  printf '%s' '{"jsonrpc":"2.0","id" : 2,"method" : "shutdown"}'
   printf 'Content-Length: 35\r\n\r\n'
   printf '%s' '{"jsonrpc":"2.0","method" : "exit"}'
 } > "$protocol_input"

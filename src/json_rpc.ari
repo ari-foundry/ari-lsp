@@ -19,9 +19,20 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
   var initialize_value_match = 0;
   var shutdown_value_match = 0;
   var exit_value_match = 0;
-  var saw_initialize_method = false;
-  var saw_shutdown_method = false;
-  var saw_exit_method = false;
+  var id_key_match = 0;
+  var waiting_id_colon = false;
+  var waiting_id_value = false;
+  var reading_id_value = false;
+  var id_value = 0;
+  var saw_id_digit = false;
+  var frame_saw_initialize_method = false;
+  var frame_saw_shutdown_method = false;
+  var frame_saw_exit_method = false;
+  var frame_saw_id_one = false;
+  var frame_saw_id_two = false;
+  var saw_initialize_request = false;
+  var saw_shutdown_request = false;
+  var saw_exit_notification = false;
   while true {
     match std::io::read_one<std::io::Stdin>(input) {
       std::io::ReadByteValue(value) => {
@@ -29,13 +40,13 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
           if reading_method_value {
             if value == 34u8 {
               if initialize_value_match == 10 {
-                saw_initialize_method = true;
+                frame_saw_initialize_method = true;
               }
               if shutdown_value_match == 8 {
-                saw_shutdown_method = true;
+                frame_saw_shutdown_method = true;
               }
               if exit_value_match == 4 {
-                saw_exit_method = true;
+                frame_saw_exit_method = true;
               }
               reading_method_value = false;
               method_key_match = 0;
@@ -78,8 +89,73 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             }
           }
 
+          if reading_id_value {
+            if is_ascii_digit(value) {
+              id_value = id_value * 10 + ascii_digit_value(value);
+              saw_id_digit = true;
+            } else {
+              if saw_id_digit {
+                if id_value == 1 {
+                  frame_saw_id_one = true;
+                }
+                if id_value == 2 {
+                  frame_saw_id_two = true;
+                }
+              }
+              reading_id_value = false;
+              id_value = 0;
+              saw_id_digit = false;
+              id_key_match = next_id_key_match_index(value, 0);
+            }
+          } else if waiting_id_value {
+            if !is_json_whitespace(value) {
+              if is_ascii_digit(value) {
+                waiting_id_value = false;
+                reading_id_value = true;
+                id_value = ascii_digit_value(value);
+                saw_id_digit = true;
+              } else {
+                waiting_id_value = false;
+                id_key_match = next_id_key_match_index(value, 0);
+              }
+            }
+          } else if waiting_id_colon {
+            if !is_json_whitespace(value) {
+              if value == 58u8 {
+                waiting_id_colon = false;
+                waiting_id_value = true;
+              } else {
+                waiting_id_colon = false;
+                id_key_match = next_id_key_match_index(value, 0);
+              }
+            }
+          } else {
+            id_key_match = next_id_key_match_index(value, id_key_match);
+            if id_key_match == 4 {
+              waiting_id_colon = true;
+              id_key_match = 0;
+            }
+          }
+
           body_remaining = body_remaining - 1;
           if body_remaining == 0 {
+            if reading_id_value && saw_id_digit {
+              if id_value == 1 {
+                frame_saw_id_one = true;
+              }
+              if id_value == 2 {
+                frame_saw_id_two = true;
+              }
+            }
+            if frame_saw_initialize_method && frame_saw_id_one {
+              saw_initialize_request = true;
+            }
+            if frame_saw_shutdown_method && frame_saw_id_two {
+              saw_shutdown_request = true;
+            }
+            if frame_saw_exit_method {
+              saw_exit_notification = true;
+            }
             complete_frame_count = complete_frame_count + 1;
             content_length_match = 0;
             reading_content_length = false;
@@ -93,6 +169,17 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             initialize_value_match = 0;
             shutdown_value_match = 0;
             exit_value_match = 0;
+            id_key_match = 0;
+            waiting_id_colon = false;
+            waiting_id_value = false;
+            reading_id_value = false;
+            id_value = 0;
+            saw_id_digit = false;
+            frame_saw_initialize_method = false;
+            frame_saw_shutdown_method = false;
+            frame_saw_exit_method = false;
+            frame_saw_id_one = false;
+            frame_saw_id_two = false;
           }
         } else if reading_content_length {
           if is_ascii_digit(value) {
@@ -125,7 +212,7 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
         }
       }
       std::io::ReadByteEof => {
-        if complete_frame_count >= 3 && saw_initialize_method && saw_shutdown_method && saw_exit_method {
+        if complete_frame_count >= 3 && saw_initialize_request && saw_shutdown_request && saw_exit_notification {
           let write_status = write_protocol_smoke_responses(output);
           if write_status != 0 {
             return write_status;
@@ -146,6 +233,25 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
     }
   }
 
+  return 0;
+}
+
+fn next_id_key_match_index(value: u8, index: i64) -> i64 {
+  if index == 0 && value == 34u8 {
+    return 1;
+  }
+  if index == 1 && value == 105u8 {
+    return 2;
+  }
+  if index == 2 && value == 100u8 {
+    return 3;
+  }
+  if index == 3 && value == 34u8 {
+    return 4;
+  }
+  if value == 34u8 {
+    return 1;
+  }
   return 0;
 }
 

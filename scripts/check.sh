@@ -74,12 +74,13 @@ require_grep "write_protocol_smoke_responses" src/json_rpc.ari
 require_grep "next_content_length_header_match_index" src/json_rpc.ari
 require_grep "next_header_end_match_index" src/json_rpc.ari
 require_grep "complete_frame_count >= 3" src/json_rpc.ari
+require_grep "next_id_key_match_index" src/json_rpc.ari
 require_grep "next_method_key_match_index" src/json_rpc.ari
 require_grep "next_initialize_method_value_match_index" src/json_rpc.ari
 require_grep "next_shutdown_method_value_match_index" src/json_rpc.ari
 require_grep "next_exit_method_value_match_index" src/json_rpc.ari
 require_grep "is_json_whitespace" src/json_rpc.ari
-require_grep "saw_initialize_method && saw_shutdown_method && saw_exit_method" src/json_rpc.ari
+require_grep "saw_initialize_request && saw_shutdown_request && saw_exit_notification" src/json_rpc.ari
 require_grep "body_remaining = pending_content_length" src/json_rpc.ari
 require_grep "Content-Length: 53" src/json_rpc.ari
 require_grep "Content-Length: 38" src/json_rpc.ari
@@ -103,8 +104,12 @@ require_grep "non-protocol stdin smoke" scripts/smoke.sh
 require_grep "not-json-rpc" scripts/smoke.sh
 require_grep "incomplete-frame stdin smoke" scripts/smoke.sh
 require_grep "method-free framed stdin smoke" scripts/smoke.sh
+require_grep "request-id-free framed stdin smoke" scripts/smoke.sh
 require_grep "protocol smoke" scripts/smoke.sh
-require_grep "Content-Length: 60" scripts/smoke.sh
+require_grep "Content-Length: 62" scripts/smoke.sh
+require_grep "Content-Length: 48" scripts/smoke.sh
+require_grep '"id" : 1' scripts/smoke.sh
+require_grep '"id" : 2' scripts/smoke.sh
 require_grep '"method" : "initialize"' scripts/smoke.sh
 require_grep '"method" : "shutdown"' scripts/smoke.sh
 require_grep '"method" : "exit"' scripts/smoke.sh
