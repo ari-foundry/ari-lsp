@@ -94,6 +94,8 @@ require_grep "SmokeMethodValueScanReset" src/json_rpc.ari
 require_grep "reset_smoke_method_value_scan" src/json_rpc.ari
 require_grep "SmokeMethodColonWaitStart" src/json_rpc.ari
 require_grep "start_smoke_method_colon_wait" src/json_rpc.ari
+require_grep "SmokeMethodValueWaitStart" src/json_rpc.ari
+require_grep "start_smoke_method_value_wait" src/json_rpc.ari
 require_grep "SmokeMethodValueWaitFallback" src/json_rpc.ari
 require_grep "fallback_smoke_method_value_wait" src/json_rpc.ari
 require_grep "SmokeRequestIdValueScanReset" src/json_rpc.ari
@@ -144,6 +146,7 @@ require_grep "parsed_header_state.frame_progress" src/json_rpc.ari
 require_grep "scanned_method_value.saw_initialize_method" src/json_rpc.ari
 require_grep "reading_method_value = method_value_scan_reset.reading_method_value" src/json_rpc.ari
 require_grep "waiting_method_colon = method_colon_wait_start.waiting_method_colon" src/json_rpc.ari
+require_grep "waiting_method_value = method_value_wait_start.waiting_method_value" src/json_rpc.ari
 require_grep "method_key_match = method_value_wait_fallback.method_key_match" src/json_rpc.ari
 require_grep "reading_id_value = request_id_value_scan_reset.reading_id_value" src/json_rpc.ari
 require_grep "reading_id_value = request_id_value_scan_start.reading_id_value" src/json_rpc.ari
