@@ -85,6 +85,8 @@ require_grep "initialize_request_id" src/json_rpc.ari
 require_grep "shutdown_request_id" src/json_rpc.ari
 require_grep "ScannedSmokeRequestId" src/json_rpc.ari
 require_grep "finalize_scanned_smoke_request_id" src/json_rpc.ari
+require_grep "JsonRpcFrameProgress" src/json_rpc.ari
+require_grep "complete_json_rpc_frame" src/json_rpc.ari
 require_grep "CompletedSmokeFrame" src/json_rpc.ari
 require_grep "complete_smoke_frame" src/json_rpc.ari
 require_grep "SmokeFrameScanState" src/json_rpc.ari

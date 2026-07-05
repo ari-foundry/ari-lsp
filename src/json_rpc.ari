@@ -11,8 +11,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
   var saw_content_length_digit = initial_header_scan.saw_content_length_digit;
   var pending_content_length = initial_header_scan.pending_content_length;
   var header_end_match = initial_header_scan.header_end_match;
-  var body_remaining = 0;
-  var complete_frame_count = 0;
+  let initial_frame_progress = initial_json_rpc_frame_progress();
+  var body_remaining = initial_frame_progress.body_remaining;
+  var complete_frame_count = initial_frame_progress.complete_frame_count;
   let initial_frame_scan = initial_smoke_frame_scan_state();
   var method_key_match = initial_frame_scan.method_key_match;
   var waiting_method_colon = initial_frame_scan.waiting_method_colon;
@@ -165,7 +166,13 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             saw_exit_notification = applied_protocol_state.saw_exit_notification;
             initialize_request_id = applied_protocol_state.initialize_request_id;
             shutdown_request_id = applied_protocol_state.shutdown_request_id;
-            complete_frame_count = complete_frame_count + 1;
+            let body_end_frame_progress = JsonRpcFrameProgress {
+              body_remaining: body_remaining,
+              complete_frame_count: complete_frame_count,
+            };
+            let body_end_completed_progress = complete_json_rpc_frame(body_end_frame_progress);
+            body_remaining = body_end_completed_progress.body_remaining;
+            complete_frame_count = body_end_completed_progress.complete_frame_count;
             let frame_end_header_scan = initial_content_length_header_scan_state();
             content_length_match = frame_end_header_scan.content_length_match;
             reading_content_length = frame_end_header_scan.reading_content_length;
@@ -202,7 +209,13 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             if header_end_match == 4 && saw_content_length_digit {
               body_remaining = pending_content_length;
               if body_remaining == 0 {
-                complete_frame_count = complete_frame_count + 1;
+                let zero_length_frame_progress = JsonRpcFrameProgress {
+                  body_remaining: body_remaining,
+                  complete_frame_count: complete_frame_count,
+                };
+                let zero_length_completed_progress = complete_json_rpc_frame(zero_length_frame_progress);
+                body_remaining = zero_length_completed_progress.body_remaining;
+                complete_frame_count = zero_length_completed_progress.complete_frame_count;
               }
               let header_end_header_scan = initial_content_length_header_scan_state();
               content_length_match = header_end_header_scan.content_length_match;
@@ -251,6 +264,11 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
 struct ScannedSmokeRequestId {
   present: bool,
   value: i64,
+}
+
+struct JsonRpcFrameProgress {
+  body_remaining: i64,
+  complete_frame_count: i64,
 }
 
 struct CompletedSmokeFrame {
@@ -520,6 +538,20 @@ fn ascii_digit_value(value: u8) -> i64 {
 
 fn finalize_scanned_smoke_request_id(saw_digit: bool, value: i64) -> ScannedSmokeRequestId {
   return ScannedSmokeRequestId { present: saw_digit, value: value };
+}
+
+fn initial_json_rpc_frame_progress() -> JsonRpcFrameProgress {
+  return JsonRpcFrameProgress {
+    body_remaining: 0,
+    complete_frame_count: 0,
+  };
+}
+
+fn complete_json_rpc_frame(progress: JsonRpcFrameProgress) -> JsonRpcFrameProgress {
+  return JsonRpcFrameProgress {
+    body_remaining: 0,
+    complete_frame_count: progress.complete_frame_count + 1,
+  };
 }
 
 fn complete_smoke_frame(
