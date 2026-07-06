@@ -167,8 +167,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             body_remaining: body_remaining,
             complete_frame_count: complete_frame_count,
           });
-          body_remaining = consumed_body_progress.body_remaining;
-          complete_frame_count = consumed_body_progress.complete_frame_count;
+          let applied_consumed_body_progress = apply_consumed_body_progress_fields(consumed_body_progress);
+          body_remaining = applied_consumed_body_progress.body_remaining;
+          complete_frame_count = applied_consumed_body_progress.complete_frame_count;
           if body_remaining == 0 {
             let completed_frame = complete_body_end_smoke_frame(
               frame_saw_initialize_method,
@@ -999,6 +1000,10 @@ fn consume_json_rpc_body_byte(progress: JsonRpcFrameProgress) -> JsonRpcFramePro
     body_remaining: progress.body_remaining - 1,
     complete_frame_count: progress.complete_frame_count,
   };
+}
+
+fn apply_consumed_body_progress_fields(progress: JsonRpcFrameProgress) -> JsonRpcFrameProgress {
+  return progress;
 }
 
 fn apply_completed_smoke_frame_to_body_end_state(
