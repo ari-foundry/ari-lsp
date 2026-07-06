@@ -209,7 +209,7 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             saw_content_length_digit = frame_end_header_scan.saw_content_length_digit;
             pending_content_length = frame_end_header_scan.pending_content_length;
             header_end_match = frame_end_header_scan.header_end_match;
-            let next_frame_scan = applied_body_end_scan_reset.frame_scan;
+            let next_frame_scan = apply_body_end_frame_scan_reset(applied_body_end_scan_reset);
             method_key_match = next_frame_scan.method_key_match;
             waiting_method_colon = next_frame_scan.waiting_method_colon;
             waiting_method_value = next_frame_scan.waiting_method_value;
@@ -1127,6 +1127,10 @@ fn apply_body_end_scan_reset_state(reset_state: BodyEndScanResetState) -> BodyEn
 
 fn apply_body_end_header_scan_reset(reset_state: BodyEndScanResetState) -> ContentLengthHeaderScanState {
   return reset_state.header_scan;
+}
+
+fn apply_body_end_frame_scan_reset(reset_state: BodyEndScanResetState) -> SmokeFrameScanState {
+  return reset_state.frame_scan;
 }
 
 fn initial_smoke_protocol_state() -> SmokeProtocolState {
