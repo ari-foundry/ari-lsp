@@ -291,8 +291,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             pending_content_length = parsed_header_scan.pending_content_length;
             header_end_match = parsed_header_scan.header_end_match;
             let parsed_frame_progress = parsed_header_state.frame_progress;
-            body_remaining = parsed_frame_progress.body_remaining;
-            complete_frame_count = parsed_frame_progress.complete_frame_count;
+            let applied_parsed_frame_progress = apply_parsed_frame_progress_fields(parsed_frame_progress);
+            body_remaining = applied_parsed_frame_progress.body_remaining;
+            complete_frame_count = applied_parsed_frame_progress.complete_frame_count;
           }
         } else {
           let scanned_header_start = scan_content_length_header_start(
@@ -1055,6 +1056,10 @@ fn apply_content_length_parse_to_frame_progress(
     body_remaining: parsed_content_length.length,
     complete_frame_count: progress.complete_frame_count,
   };
+}
+
+fn apply_parsed_frame_progress_fields(progress: JsonRpcFrameProgress) -> JsonRpcFrameProgress {
+  return progress;
 }
 
 fn apply_content_length_parse_to_header_state(
