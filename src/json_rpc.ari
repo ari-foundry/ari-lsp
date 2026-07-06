@@ -203,7 +203,7 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             body_remaining = body_end_completed_progress.body_remaining;
             complete_frame_count = body_end_completed_progress.complete_frame_count;
             let applied_body_end_scan_reset = apply_body_end_scan_reset_state(initial_body_end_scan_reset_state());
-            let frame_end_header_scan = applied_body_end_scan_reset.header_scan;
+            let frame_end_header_scan = apply_body_end_header_scan_reset(applied_body_end_scan_reset);
             content_length_match = frame_end_header_scan.content_length_match;
             reading_content_length = frame_end_header_scan.reading_content_length;
             saw_content_length_digit = frame_end_header_scan.saw_content_length_digit;
@@ -1123,6 +1123,10 @@ fn initial_body_end_scan_reset_state() -> BodyEndScanResetState {
 
 fn apply_body_end_scan_reset_state(reset_state: BodyEndScanResetState) -> BodyEndScanResetState {
   return reset_state;
+}
+
+fn apply_body_end_header_scan_reset(reset_state: BodyEndScanResetState) -> ContentLengthHeaderScanState {
+  return reset_state.header_scan;
 }
 
 fn initial_smoke_protocol_state() -> SmokeProtocolState {
