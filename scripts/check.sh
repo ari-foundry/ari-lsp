@@ -150,6 +150,7 @@ require_grep "apply_body_end_scan_reset_state" src/json_rpc.ari
 require_grep "apply_body_end_header_scan_reset" src/json_rpc.ari
 require_grep "apply_body_end_frame_scan_reset" src/json_rpc.ari
 require_grep "apply_body_end_header_scan_fields" src/json_rpc.ari
+require_grep "apply_body_end_frame_scan_fields" src/json_rpc.ari
 require_grep "apply_completed_smoke_frame_to_protocol_state" src/json_rpc.ari
 require_grep "frame_has_supported_smoke_request_id" src/json_rpc.ari
 require_grep "is_supported_smoke_request_id" src/json_rpc.ari
@@ -161,6 +162,7 @@ require_grep "let body_end_completed_progress = apply_body_end_frame_progress" s
 require_grep "let frame_end_header_scan = apply_body_end_header_scan_reset" src/json_rpc.ari
 require_grep "let applied_body_end_header_scan = apply_body_end_header_scan_fields" src/json_rpc.ari
 require_grep "let next_frame_scan = apply_body_end_frame_scan_reset" src/json_rpc.ari
+require_grep "let applied_body_end_frame_scan = apply_body_end_frame_scan_fields" src/json_rpc.ari
 require_grep "scanned_header_start.content_length_match" src/json_rpc.ari
 require_grep "pending_content_length = digit_header_scan.pending_content_length" src/json_rpc.ari
 require_grep "header_end_match = header_end_scan.header_end_match" src/json_rpc.ari

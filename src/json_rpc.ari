@@ -211,24 +211,25 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             pending_content_length = applied_body_end_header_scan.pending_content_length;
             header_end_match = applied_body_end_header_scan.header_end_match;
             let next_frame_scan = apply_body_end_frame_scan_reset(applied_body_end_scan_reset);
-            method_key_match = next_frame_scan.method_key_match;
-            waiting_method_colon = next_frame_scan.waiting_method_colon;
-            waiting_method_value = next_frame_scan.waiting_method_value;
-            reading_method_value = next_frame_scan.reading_method_value;
-            initialize_value_match = next_frame_scan.initialize_value_match;
-            shutdown_value_match = next_frame_scan.shutdown_value_match;
-            exit_value_match = next_frame_scan.exit_value_match;
-            id_key_match = next_frame_scan.id_key_match;
-            waiting_id_colon = next_frame_scan.waiting_id_colon;
-            waiting_id_value = next_frame_scan.waiting_id_value;
-            reading_id_value = next_frame_scan.reading_id_value;
-            id_value = next_frame_scan.id_value;
-            saw_id_digit = next_frame_scan.saw_id_digit;
-            frame_saw_initialize_method = next_frame_scan.saw_initialize_method;
-            frame_saw_shutdown_method = next_frame_scan.saw_shutdown_method;
-            frame_saw_exit_method = next_frame_scan.saw_exit_method;
-            frame_saw_request_id = next_frame_scan.saw_request_id;
-            frame_request_id = next_frame_scan.request_id;
+            let applied_body_end_frame_scan = apply_body_end_frame_scan_fields(next_frame_scan);
+            method_key_match = applied_body_end_frame_scan.method_key_match;
+            waiting_method_colon = applied_body_end_frame_scan.waiting_method_colon;
+            waiting_method_value = applied_body_end_frame_scan.waiting_method_value;
+            reading_method_value = applied_body_end_frame_scan.reading_method_value;
+            initialize_value_match = applied_body_end_frame_scan.initialize_value_match;
+            shutdown_value_match = applied_body_end_frame_scan.shutdown_value_match;
+            exit_value_match = applied_body_end_frame_scan.exit_value_match;
+            id_key_match = applied_body_end_frame_scan.id_key_match;
+            waiting_id_colon = applied_body_end_frame_scan.waiting_id_colon;
+            waiting_id_value = applied_body_end_frame_scan.waiting_id_value;
+            reading_id_value = applied_body_end_frame_scan.reading_id_value;
+            id_value = applied_body_end_frame_scan.id_value;
+            saw_id_digit = applied_body_end_frame_scan.saw_id_digit;
+            frame_saw_initialize_method = applied_body_end_frame_scan.saw_initialize_method;
+            frame_saw_shutdown_method = applied_body_end_frame_scan.saw_shutdown_method;
+            frame_saw_exit_method = applied_body_end_frame_scan.saw_exit_method;
+            frame_saw_request_id = applied_body_end_frame_scan.saw_request_id;
+            frame_request_id = applied_body_end_frame_scan.request_id;
           }
         } else if reading_content_length {
           if is_ascii_digit(value) {
@@ -1136,6 +1137,10 @@ fn apply_body_end_frame_scan_reset(reset_state: BodyEndScanResetState) -> SmokeF
 
 fn apply_body_end_header_scan_fields(header_scan: ContentLengthHeaderScanState) -> ContentLengthHeaderScanState {
   return header_scan;
+}
+
+fn apply_body_end_frame_scan_fields(frame_scan: SmokeFrameScanState) -> SmokeFrameScanState {
+  return frame_scan;
 }
 
 fn initial_smoke_protocol_state() -> SmokeProtocolState {
