@@ -200,8 +200,9 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             initialize_request_id = applied_body_end_protocol_state.initialize_request_id;
             shutdown_request_id = applied_body_end_protocol_state.shutdown_request_id;
             let body_end_completed_progress = apply_body_end_frame_progress(body_end_frame_state);
-            body_remaining = body_end_completed_progress.body_remaining;
-            complete_frame_count = body_end_completed_progress.complete_frame_count;
+            let applied_body_end_frame_progress = apply_body_end_frame_progress_fields(body_end_completed_progress);
+            body_remaining = applied_body_end_frame_progress.body_remaining;
+            complete_frame_count = applied_body_end_frame_progress.complete_frame_count;
             let applied_body_end_scan_reset = apply_body_end_scan_reset_state(initial_body_end_scan_reset_state());
             let frame_end_header_scan = apply_body_end_header_scan_reset(applied_body_end_scan_reset);
             let applied_body_end_header_scan = apply_body_end_header_scan_fields(frame_end_header_scan);
@@ -1017,6 +1018,10 @@ fn apply_body_end_protocol_state_fields(protocol_state: SmokeProtocolState) -> S
 
 fn apply_body_end_frame_progress(body_end_frame_state: BodyEndSmokeFrameState) -> JsonRpcFrameProgress {
   return body_end_frame_state.frame_progress;
+}
+
+fn apply_body_end_frame_progress_fields(frame_progress: JsonRpcFrameProgress) -> JsonRpcFrameProgress {
+  return frame_progress;
 }
 
 fn finalize_content_length_parse(saw_digit: bool, length: i64, header_end_match: i64) -> ContentLengthParseResult {
