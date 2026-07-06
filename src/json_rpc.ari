@@ -204,14 +204,15 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             body_remaining = applied_body_end_frame_progress.body_remaining;
             complete_frame_count = applied_body_end_frame_progress.complete_frame_count;
             let applied_body_end_scan_reset = apply_body_end_scan_reset_state(initial_body_end_scan_reset_state());
-            let frame_end_header_scan = apply_body_end_header_scan_reset(applied_body_end_scan_reset);
+            let applied_body_end_scan_reset_fields = apply_body_end_scan_reset_fields(applied_body_end_scan_reset);
+            let frame_end_header_scan = apply_body_end_header_scan_reset(applied_body_end_scan_reset_fields);
             let applied_body_end_header_scan = apply_body_end_header_scan_fields(frame_end_header_scan);
             content_length_match = applied_body_end_header_scan.content_length_match;
             reading_content_length = applied_body_end_header_scan.reading_content_length;
             saw_content_length_digit = applied_body_end_header_scan.saw_content_length_digit;
             pending_content_length = applied_body_end_header_scan.pending_content_length;
             header_end_match = applied_body_end_header_scan.header_end_match;
-            let next_frame_scan = apply_body_end_frame_scan_reset(applied_body_end_scan_reset);
+            let next_frame_scan = apply_body_end_frame_scan_reset(applied_body_end_scan_reset_fields);
             let applied_body_end_frame_scan = apply_body_end_frame_scan_fields(next_frame_scan);
             method_key_match = applied_body_end_frame_scan.method_key_match;
             waiting_method_colon = applied_body_end_frame_scan.waiting_method_colon;
@@ -1133,6 +1134,10 @@ fn initial_body_end_scan_reset_state() -> BodyEndScanResetState {
 }
 
 fn apply_body_end_scan_reset_state(reset_state: BodyEndScanResetState) -> BodyEndScanResetState {
+  return reset_state;
+}
+
+fn apply_body_end_scan_reset_fields(reset_state: BodyEndScanResetState) -> BodyEndScanResetState {
   return reset_state;
 }
 
