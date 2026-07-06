@@ -179,13 +179,12 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
               reading_id_value,
               saw_id_digit,
               id_value);
-            let current_protocol_state = SmokeProtocolState {
-              saw_initialize_request: saw_initialize_request,
-              saw_shutdown_request: saw_shutdown_request,
-              saw_exit_notification: saw_exit_notification,
-              initialize_request_id: initialize_request_id,
-              shutdown_request_id: shutdown_request_id,
-            };
+            let current_protocol_state = build_current_smoke_protocol_state(
+              saw_initialize_request,
+              saw_shutdown_request,
+              saw_exit_notification,
+              initialize_request_id,
+              shutdown_request_id);
             let body_end_frame_state = apply_completed_smoke_frame_to_body_end_state(
               current_protocol_state,
               JsonRpcFrameProgress {
@@ -1150,6 +1149,21 @@ fn initial_smoke_protocol_state() -> SmokeProtocolState {
     saw_exit_notification: false,
     initialize_request_id: 0,
     shutdown_request_id: 0,
+  };
+}
+
+fn build_current_smoke_protocol_state(
+  saw_initialize_request: bool,
+  saw_shutdown_request: bool,
+  saw_exit_notification: bool,
+  initialize_request_id: i64,
+  shutdown_request_id: i64) -> SmokeProtocolState {
+  return SmokeProtocolState {
+    saw_initialize_request: saw_initialize_request,
+    saw_shutdown_request: saw_shutdown_request,
+    saw_exit_notification: saw_exit_notification,
+    initialize_request_id: initialize_request_id,
+    shutdown_request_id: shutdown_request_id,
   };
 }
 
