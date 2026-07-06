@@ -214,7 +214,8 @@ fn run_stdio_loop_with_stdio(input: ref mut std::io::Stdin, output: ref mut std:
             pending_content_length = applied_body_end_header_scan.pending_content_length;
             header_end_match = applied_body_end_header_scan.header_end_match;
             let next_frame_scan = apply_body_end_frame_scan_reset(applied_body_end_scan_reset_fields);
-            let applied_body_end_frame_scan = apply_body_end_frame_scan_fields(next_frame_scan);
+            let applied_body_end_frame_scan_reset = apply_body_end_frame_scan_reset_fields(next_frame_scan);
+            let applied_body_end_frame_scan = apply_body_end_frame_scan_fields(applied_body_end_frame_scan_reset);
             method_key_match = applied_body_end_frame_scan.method_key_match;
             waiting_method_colon = applied_body_end_frame_scan.waiting_method_colon;
             waiting_method_value = applied_body_end_frame_scan.waiting_method_value;
@@ -1152,6 +1153,10 @@ fn apply_body_end_header_scan_reset_fields(header_scan: ContentLengthHeaderScanS
 
 fn apply_body_end_frame_scan_reset(reset_state: BodyEndScanResetState) -> SmokeFrameScanState {
   return reset_state.frame_scan;
+}
+
+fn apply_body_end_frame_scan_reset_fields(frame_scan: SmokeFrameScanState) -> SmokeFrameScanState {
+  return frame_scan;
 }
 
 fn apply_body_end_header_scan_fields(header_scan: ContentLengthHeaderScanState) -> ContentLengthHeaderScanState {
