@@ -134,6 +134,7 @@ require_grep "apply_content_length_parse_to_frame_progress" src/json_rpc.ari
 require_grep "apply_parsed_frame_progress_fields" src/json_rpc.ari
 require_grep "apply_parsed_header_scan_fields" src/json_rpc.ari
 require_grep "ParsedContentLengthHeaderState" src/json_rpc.ari
+require_grep "apply_parsed_header_state_fields" src/json_rpc.ari
 require_grep "apply_content_length_parse_to_header_state" src/json_rpc.ari
 require_grep "CompletedSmokeFrame" src/json_rpc.ari
 require_grep "complete_smoke_frame" src/json_rpc.ari
@@ -201,8 +202,11 @@ require_grep "id_key_match = request_id_value_wait_fallback.id_key_match" src/js
 require_grep "waiting_id_colon = request_id_colon_wait_start.waiting_id_colon" src/json_rpc.ari
 require_grep "let applied_consumed_body_progress = apply_consumed_body_progress_fields" src/json_rpc.ari
 require_grep "body_remaining = applied_consumed_body_progress.body_remaining" src/json_rpc.ari
+require_grep "let applied_parsed_header_state = apply_parsed_header_state_fields" src/json_rpc.ari
+require_grep "let parsed_header_scan = applied_parsed_header_state.header_scan" src/json_rpc.ari
 require_grep "let applied_parsed_header_scan = apply_parsed_header_scan_fields" src/json_rpc.ari
 require_grep "content_length_match = applied_parsed_header_scan.content_length_match" src/json_rpc.ari
+require_grep "let parsed_frame_progress = applied_parsed_header_state.frame_progress" src/json_rpc.ari
 require_grep "let applied_parsed_frame_progress = apply_parsed_frame_progress_fields" src/json_rpc.ari
 require_grep "body_remaining = applied_parsed_frame_progress.body_remaining" src/json_rpc.ari
 require_grep "Content-Length: 53" src/json_rpc.ari
